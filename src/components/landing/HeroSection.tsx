@@ -62,15 +62,15 @@ export function HeroSection() {
           <h1
             className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-fade-in stagger-1 leading-tight"
           >
-            <span className="text-slate-900">Solve Anything.</span>
+            <span className="text-slate-900">Solve Anything</span>
             <br />
-            <span className="text-slate-900">Understand Everything.</span>
+            <span className="text-slate-900">Understand Everything</span>
             <br />
             <span
               className="bg-gradient-to-r from-green-500 via-emerald-400 to-green-600 bg-clip-text text-transparent"
               style={{ backgroundSize: "200% 100%" }}
             >
-              With Sokrate AI.
+              With Sokrate AI
             </span>
           </h1>
 
