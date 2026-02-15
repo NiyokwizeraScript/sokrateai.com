@@ -62,15 +62,15 @@ export function HeroSection() {
           <h1
             className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-fade-in stagger-1 leading-tight"
           >
-            <span className="text-slate-900">Push Beyond Limits.</span>
+            <span className="text-slate-900">Solve Anything.</span>
             <br />
-            <span className="text-slate-900">Become Brilliant with</span>
+            <span className="text-slate-900">Understand Everything.</span>
             <br />
             <span
               className="bg-gradient-to-r from-green-500 via-emerald-400 to-green-600 bg-clip-text text-transparent"
               style={{ backgroundSize: "200% 100%" }}
             >
-              Sokrate AI
+              With Sokrate AI.
             </span>
           </h1>
 
@@ -78,9 +78,8 @@ export function HeroSection() {
           <p
             className="max-w-2xl mx-auto text-lg md:text-xl text-gray-600 mb-10 animate-fade-in stagger-2"
           >
-            Master Mathematics, Physics, Chemistry, and Biology with an AI that
-            solves complex problems, synthesizes research documents, and tracks
-            your learning journey.
+            Any problem. Any subject. Upload any problem - get step-by-step
+            solutions, clear explanations, and custom quizzes to actually learn.
           </p>
 
           {/* CTAs */}
