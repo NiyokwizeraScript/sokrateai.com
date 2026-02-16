@@ -73,12 +73,12 @@ export function AppSidebar() {
   const user = session?.user;
   const userInitials = user?.name
     ? user.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-    : user?.email?.slice(0, 2).toUpperCase() ?? "?";
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : (user?.email?.slice(0, 2).toUpperCase() ?? "?");
 
   const handleSignOut = async () => {
     await signOut();
@@ -91,7 +91,7 @@ export function AppSidebar() {
           <div className="relative">
             <div className="absolute inset-0 rounded-lg bg-primary/20 blur-md" />
             <img
-              src="/sokrate-ai.png"
+              src="/Sokrate AI.png"
               alt="Sokrate AI"
               className="relative h-9 w-9 object-contain drop-shadow-lg"
             />
@@ -125,14 +125,14 @@ export function AppSidebar() {
                       className={cn(
                         "transition-all duration-200",
                         isActive &&
-                        "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
+                          "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
                       )}
                     >
                       <Link to={item.href}>
                         <item.icon
                           className={cn(
                             "h-4 w-4 transition-colors",
-                            isActive && "text-primary"
+                            isActive && "text-primary",
                           )}
                         />
                         <span className="font-medium">{item.title}</span>

@@ -14,7 +14,7 @@ export function SokrateLogo({
   className,
   iconClassName,
   showText = true,
-  size = "md"
+  size = "md",
 }: SokrateLogoProps) {
   const sizeClasses = {
     sm: "h-8 w-8",
@@ -34,21 +34,25 @@ export function SokrateLogo({
         {/* Glow effect behind the logo */}
         <div className="absolute inset-0 rounded-xl bg-primary/20 blur-lg" />
         <img
-          src="/sokrate-ai.png"
+          src="/Sokrate AI.png"
           alt="Sokrate AI"
           className={cn(
             "relative object-contain drop-shadow-lg",
             sizeClasses[size],
-            iconClassName
+            iconClassName,
           )}
         />
       </div>
       {showText ? (
         <div className="flex flex-col">
-          <span className={cn(
-            "font-heading font-bold tracking-tight text-green-600",
-            textSizeClasses[size]
-          )}>Sokrate AI</span>
+          <span
+            className={cn(
+              "font-heading font-bold tracking-tight text-green-600",
+              textSizeClasses[size],
+            )}
+          >
+            Sokrate AI
+          </span>
           <span className="text-xs font-medium text-gray-600">
             AI Learning Assistant
           </span>
