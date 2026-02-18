@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { Anthropic } from '@anthropic-ai/sdk';
+import Stripe from 'stripe';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,6 +24,9 @@ app.use(express.static(path.join(__dirname, 'dist')));
 const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
 });
+
+// Initialize Stripe Client
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Model ID - Haiku (Fallback)
 const MODEL_ID = "claude-3-haiku-20240307";

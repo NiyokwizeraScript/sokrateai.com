@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { SokrateLogo } from "@/components/auth/SokrateLogo";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Logo = () => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -88,14 +88,15 @@ const Message = ({ message }: { message: string }) => (
 );
 
 export default function CheckoutPro() {
-    let [message, setMessage] = useState('');
-    let [success, setSuccess] = useState(false);
-    let [sessionId, setSessionId] = useState('');
+    const [message, setMessage] = useState('');
+    const [success, setSuccess] = useState(false);
+    const [sessionId, setSessionId] = useState('');
     const [searchParams] = useSearchParams();
 
     useEffect(() => {
         // Check to see if this is a redirect back from Checkout
         if (searchParams.get('success')) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSuccess(true);
             setSessionId(searchParams.get('session_id') || '');
         }
