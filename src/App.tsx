@@ -26,6 +26,7 @@ import PricingSelection from "@/pages/PricingSelection";
 const queryClient = new QueryClient();
 
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 function App() {
   return (
@@ -48,7 +49,13 @@ function App() {
             <Route path="/pricing-selection" element={<PricingSelection />} />
 
             {/* Dashboard routes (with sidebar layout) */}
-            <Route element={<DashboardLayout />}>
+            <Route
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/solver" element={<Solver />} />
               <Route path="/synthesizer" element={<Synthesizer />} />
