@@ -16,6 +16,7 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from dist
 app.use(express.static(path.join(__dirname, 'dist')));
@@ -191,8 +192,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
         res.redirect(303, session.url);
     } catch (error) {
         console.error("Stripe Error:", error);
-        // If error, redirect back with error? or show JSON
-        res.status(500).send("Stripe Error: " + error.message);
+        // Expose error for debugging
+        res.status(500).json({ error: error.message, stack: error.stack });
     }
 });
 
