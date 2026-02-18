@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, Plugin, ViteDevServer } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from "path"
 import { fileURLToPath } from "url"
@@ -6,16 +6,17 @@ import { fileURLToPath } from "url"
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Custom plugin to run Express app as middleware
-const expressServer = () => {
+const expressServer = (): Plugin => {
   return {
     name: 'express-server',
-    configureServer(server) {
+    configureServer(server: ViteDevServer) {
       server.middlewares.use(async (req, res, next) => {
-        if (!req.url.startsWith('/api')) {
+        if (!req.url?.startsWith('/api')) {
           return next();
         }
         
         try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { default: app } = await import(path.resolve(__dirname, './api/index.js'));
           app(req, res, next);
         } catch (error) {
