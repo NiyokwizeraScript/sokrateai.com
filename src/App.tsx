@@ -26,40 +26,42 @@ import PricingSelection from "@/pages/PricingSelection";
 const queryClient = new QueryClient();
 
 function App() {
-    return (
-        <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-                <Routes>
-                    {/* Public routes */}
-                    <Route path="/" element={<Landing />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/verify-otp" element={<VerifyOtp />} />
-                    <Route path="/onboarding" element={<Onboarding />} />
-                    <Route path="/faq" element={<FAQ />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/terms" element={<TermsOfService />} />
-                    <Route path="/cookies" element={<CookiePolicy />} />
-                    <Route path="/checkout-pro" element={<CheckoutPro />} />
-                    <Route path="/pricing-selection" element={<PricingSelection />} />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/cookies" element={<CookiePolicy />} />
+          <Route path="/checkout-pro" element={<CheckoutPro />} />
+          <Route path="/pricing-selection" element={<PricingSelection />} />
 
-                    {/* Dashboard routes (with sidebar layout) */}
-                    <Route element={<DashboardLayout />}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/solver" element={<Solver />} />
-                        <Route path="/synthesizer" element={<Synthesizer />} />
-                        <Route path="/quizzes" element={<Quizzes />} />
-                        <Route path="/history" element={<History />} />
-                        <Route path="/feedback" element={<Feedback />} />
-                    </Route>
+          {/* Dashboard routes (with sidebar layout) */}
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/solver" element={<Solver />} />
+            <Route path="/synthesizer" element={<Synthesizer />} />
+            <Route path="/quizzes" element={<Quizzes />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/feedback" element={<Feedback />} />
+          </Route>
 
-                    {/* Catch all */}
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
-                <Toaster />
-                <Analytics />
-            </BrowserRouter>
-        </QueryClientProvider>
-    );
+          {/* Catch all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+        <Analytics />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
 }
 
 export default App;
