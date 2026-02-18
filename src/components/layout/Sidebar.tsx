@@ -30,7 +30,7 @@ import {
   Trophy,
   MessageSquare,
 } from "lucide-react";
-import { useSession, signOut } from "@/lib/auth-client";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -68,11 +68,10 @@ const navItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
 
-  const user = session?.user;
-  const userInitials = user?.name
-    ? user.name
+  const userInitials = user?.displayName
+    ? user.displayName
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -81,7 +80,7 @@ export function AppSidebar() {
     : (user?.email?.slice(0, 2).toUpperCase() ?? "?");
 
   const handleSignOut = async () => {
-    await signOut();
+    await logout();
   };
 
   return (
@@ -161,7 +160,7 @@ export function AppSidebar() {
               </Avatar>
               <div className="flex flex-col items-start text-left group-data-[collapsible=icon]:hidden">
                 <span className="text-sm font-medium text-slate-900 truncate max-w-[120px]">
-                  {user?.name ?? "User"}
+                  {user?.displayName ?? "User"}
                 </span>
                 <span className="text-xs text-gray-600 truncate max-w-[120px]">
                   {user?.email ?? ""}
@@ -176,7 +175,9 @@ export function AppSidebar() {
             className="w-[--radix-dropdown-menu-trigger-width] min-w-[200px]"
           >
             <div className="px-2 py-1.5">
-              <p className="text-sm font-medium">{user?.name ?? "User"}</p>
+              <p className="text-sm font-medium">
+                {user?.displayName ?? "User"}
+              </p>
               <p className="text-xs text-gray-600">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />

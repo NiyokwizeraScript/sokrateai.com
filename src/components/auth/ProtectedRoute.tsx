@@ -1,9 +1,9 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useSession } from "@/lib/auth-client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
-// Local type definition (originally from backend)
+
 interface CheckOnboardingStatusResponse {
   isNewUser: boolean;
   hasCompletedOnboarding: boolean;
@@ -14,7 +14,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { data: session, isPending: isSessionPending } = useSession();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
   // Check onboarding status if user is authenticated
@@ -22,14 +22,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     queryKey: ["onboarding-status"],
     queryFn: async () => {
       const response = await api.get<CheckOnboardingStatusResponse>(
-        "/api/subscription/onboarding-status"
+        "/api/subscription/onboarding-status",
       );
       return response;
     },
-    enabled: !!session?.user,
+    enabled: !!user,
   });
 
-  const isPending = isSessionPending || isOnboardingPending;
+  const isPending = loading || (!!user && isOnboardingPending);
 
   if (isPending) {
     return (
@@ -39,15 +39,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl animate-pulse-glow" />
             <Loader2 className="relative h-8 w-8 animate-spin text-primary" />
           </div>
-          <p className="text-sm text-gray-600 animate-fade-in">
-            Loading...
-          </p>
+          <p className="text-sm text-gray-600 animate-fade-in">Loading...</p>
         </div>
       </div>
     );
   }
 
-  if (!session?.user) {
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
