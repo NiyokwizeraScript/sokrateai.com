@@ -180,8 +180,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
                 },
             ],
             mode: 'subscription',
-            success_url: `http://localhost:3000/checkout-pro?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `http://localhost:3000/checkout-pro?canceled=true`,
+            success_url: `${req.protocol}://${req.get('host')}/checkout-pro?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${req.protocol}://${req.get('host')}/checkout-pro?canceled=true`,
         });
 
         res.redirect(303, session.url);
