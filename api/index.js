@@ -206,7 +206,8 @@ app.get(/.*/, (req, res) => {
 export default app;
 
 // Only listen if run directly (not imported as module)
-if (process.env.NODE_ENV !== 'production' || require.main === module) {
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === __filename;
+if (!process.env.VERCEL && isMain) {
     app.listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
     });
