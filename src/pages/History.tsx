@@ -9,17 +9,17 @@ export default function History() {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-400 flex items-center justify-center">
                         <HistoryIcon className="h-5 w-5 text-white" />
                     </div>
-                    <h1 className="text-2xl font-heading font-bold text-slate-900">Study History</h1>
+                    <h1 className="text-2xl font-heading font-bold text-foreground">Study History</h1>
                 </div>
-                <p className="text-gray-600">Review your past study sessions and solutions.</p>
+                <p className="text-muted-foreground">Review your past study sessions and solutions.</p>
             </div>
 
             <Card>
                 <CardContent className="py-12">
                     <div className="text-center">
-                        <Clock className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                        <h3 className="font-medium text-gray-600 mb-2">No history yet</h3>
-                        <p className="text-sm text-gray-500">
+                        <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="font-medium text-foreground mb-2">No history yet</h3>
+                        <p className="text-sm text-muted-foreground">
                             Your study sessions will appear here as you use the Solver, Synthesizer, and Quizzes.
                         </p>
                     </div>

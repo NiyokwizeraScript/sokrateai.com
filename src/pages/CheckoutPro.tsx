@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { SokrateLogo } from "@/components/auth/SokrateLogo";
+import { useAuth } from "@/contexts/AuthContext";
+import { setUserProfile } from "@/lib/firestore";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Logo = () => (
@@ -106,15 +109,14 @@ export default function CheckoutPro() {
   const [success, setSuccess] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Check to see if this is a redirect back from Checkout
     if (searchParams.get("success")) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuccess(true);
       setSessionId(searchParams.get("session_id") || "");
     }
-
     if (searchParams.get("canceled")) {
       setSuccess(false);
       setMessage(
@@ -122,6 +124,14 @@ export default function CheckoutPro() {
       );
     }
   }, [searchParams]);
+
+  // After successful checkout, set plan to pro in Firestore so the app gates correctly
+  useEffect(() => {
+    if (!success || !sessionId || !user) return;
+    setUserProfile(user.uid, { plan: "pro" }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ["userProfile", user.uid] });
+    });
+  }, [success, sessionId, user, queryClient]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">

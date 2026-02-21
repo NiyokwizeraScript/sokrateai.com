@@ -51,43 +51,38 @@ const additionalFeatures = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 md:py-32 relative bg-white">
-      {/* Background accent */}
+    <section id="features" className="py-16 sm:py-20 md:py-24 lg:py-32 relative bg-white">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-0 w-1/2 h-96 bg-green-500/5 blur-3xl" />
-        <div className="absolute top-1/3 right-0 w-1/3 h-96 bg-green-500/3 blur-3xl" />
+        <div className="absolute top-1/2 left-0 w-1/2 h-64 sm:h-96 bg-green-500/5 blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-slate-900">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 text-slate-900">
             Everything You Need to{" "}
             <span className="text-gradient">Excel in Science</span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Three powerful tools designed to accelerate your learning and research
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-1">
+            Three powerful tools for learning and research
           </p>
         </div>
 
-        {/* Main Feature Cards */}
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 mb-16 sm:mb-20">
           {features.map((feature, index) => (
             <FeatureCard key={feature.title} feature={feature} index={index} />
           ))}
         </div>
 
-        {/* Additional Features */}
-        <div className="grid sm:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
           {additionalFeatures.map((feature) => (
             <div
               key={feature.title}
-              className="flex flex-col items-center text-center p-6"
+              className="flex flex-col items-center text-center p-4 sm:p-6 rounded-xl border border-slate-100 bg-slate-50/50"
             >
-              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center mb-4">
-                <feature.icon className="w-6 h-6 text-green-600" />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-3 sm:mb-4 shrink-0">
+                <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
-              <h3 className="font-heading font-semibold text-lg mb-2 text-slate-900">
+              <h3 className="font-heading font-semibold text-base sm:text-lg mb-1.5 text-slate-900">
                 {feature.title}
               </h3>
               <p className="text-sm text-gray-600">
@@ -123,29 +118,22 @@ function FeatureCard({
         )}
       />
 
-      <div className="relative h-full bg-white rounded-2xl p-6 lg:p-8 border border-slate-200 transition-all duration-300 group-hover:border-green-500 group-hover:shadow-lg">
-        {/* Icon */}
+      <div className="relative h-full bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border border-slate-200 transition-all duration-300 group-hover:border-green-500 group-hover:shadow-lg">
         <div
           className={cn(
-            "w-14 h-14 rounded-xl flex items-center justify-center mb-6 bg-gradient-to-br",
+            "w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-4 sm:mb-6 bg-gradient-to-br shrink-0",
             feature.gradient
           )}
         >
-          <feature.icon className="w-7 h-7 text-white" />
+          <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
         </div>
-
-        {/* Content */}
-        <h3 className="font-heading text-xl font-bold mb-2 text-slate-900">{feature.title}</h3>
-        <p className="text-green-600 font-medium text-sm mb-3">
-          {feature.subtitle}
-        </p>
-        <p className="text-gray-600 leading-relaxed">
+        <h3 className="font-heading text-lg sm:text-xl font-bold mb-1.5 text-slate-900">{feature.title}</h3>
+        <p className="text-green-600 font-medium text-xs sm:text-sm mb-2 sm:mb-3">{feature.subtitle}</p>
+        <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
           {feature.description}
         </p>
-
-        {/* Decorative element */}
-        <div className="absolute bottom-6 right-6 opacity-5 group-hover:opacity-10 transition-opacity">
-          <feature.icon className="w-24 h-24" />
+        <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+          <feature.icon className="w-16 h-16 sm:w-24 sm:h-24" />
         </div>
       </div>
     </div>

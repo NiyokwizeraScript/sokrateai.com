@@ -86,9 +86,9 @@ export default function Solver() {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
                         <ScanLine className="h-5 w-5 text-white" />
                     </div>
-                    <h1 className="text-2xl font-heading font-bold text-slate-900">The Solver</h1>
+                    <h1 className="text-2xl font-heading font-bold text-foreground">The Solver</h1>
                 </div>
-                <p className="text-gray-600">Upload a problem or type it in — AI will solve it step by step.</p>
+                <p className="text-muted-foreground">Upload a problem or type it in — AI will solve it step by step.</p>
             </div>
 
             <div className="grid gap-6">
@@ -123,11 +123,11 @@ export default function Solver() {
                                 Upload File
                             </Button>
                             {file && (
-                                <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-lg">
                                     <span>{file.name}</span>
-                                    <span className="text-gray-400">({formatFileSize(file.size)})</span>
+                                    <span className="text-muted-foreground/80">({formatFileSize(file.size)})</span>
                                     <button onClick={() => setFile(null)}>
-                                        <X className="h-3 w-3 text-gray-400 hover:text-red-500" />
+                                        <X className="h-3 w-3 text-muted-foreground hover:text-red-500" />
                                     </button>
                                 </div>
                             )}

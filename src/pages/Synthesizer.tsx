@@ -81,9 +81,9 @@ export default function Synthesizer() {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                         <FileText className="h-5 w-5 text-white" />
                     </div>
-                    <h1 className="text-2xl font-heading font-bold text-slate-900">The Synthesizer</h1>
+                    <h1 className="text-2xl font-heading font-bold text-foreground">The Synthesizer</h1>
                 </div>
-                <p className="text-gray-600">Upload a document and let AI re-explain it for you.</p>
+                <p className="text-muted-foreground">Upload a document and let AI re-explain it for you.</p>
             </div>
 
             <div className="grid gap-6">
@@ -103,28 +103,28 @@ export default function Synthesizer() {
 
                         {!file ? (
                             <div
-                                className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                                className="border-2 border-dashed border-border rounded-xl p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
                                 onClick={() => fileInputRef.current?.click()}
                             >
-                                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                <h3 className="font-medium text-gray-700 mb-2">
+                                <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                <h3 className="font-medium text-foreground mb-2">
                                     Drop your document here or click to upload
                                 </h3>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Supports PDF, images, and text documents (max 10MB)
                                 </p>
                             </div>
                         ) : (
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-muted rounded-xl">
                                 <div className="flex items-center gap-3">
                                     <FileUp className="h-8 w-8 text-primary" />
                                     <div>
-                                        <p className="font-medium text-slate-900">{file.name}</p>
-                                        <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
+                                        <p className="font-medium text-foreground">{file.name}</p>
+                                        <p className="text-sm text-muted-foreground">{formatFileSize(file.size)}</p>
                                     </div>
                                 </div>
                                 <button onClick={() => { setFile(null); setSynthesis(null); }}>
-                                    <X className="h-5 w-5 text-gray-400 hover:text-red-500" />
+                                    <X className="h-5 w-5 text-muted-foreground hover:text-red-500" />
                                 </button>
                             </div>
                         )}

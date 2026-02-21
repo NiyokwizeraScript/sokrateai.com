@@ -36,10 +36,10 @@ export default function Dashboard() {
         <div className="p-6 lg:p-8 max-w-6xl mx-auto">
             {/* Welcome Section */}
             <div className="mb-8">
-                <h1 className="text-3xl font-heading font-bold text-slate-900">
+                <h1 className="text-3xl font-heading font-bold text-foreground">
                     Welcome back, <span className="text-primary">{userName}</span>
                 </h1>
-                <p className="text-gray-600 mt-2">
+                <p className="text-muted-foreground mt-2">
                     What would you like to study today?
                 </p>
             </div>
@@ -59,7 +59,7 @@ export default function Dashboard() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-sm text-gray-600">{tool.description}</p>
+                                <p className="text-sm text-muted-foreground">{tool.description}</p>
                             </CardContent>
                         </Card>
                     </Link>
@@ -79,9 +79,9 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                     <div className="text-center py-8">
-                        <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                        <h3 className="font-medium text-gray-600 mb-2">No activity yet</h3>
-                        <p className="text-sm text-gray-500 mb-4">
+                        <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="font-medium text-foreground mb-2">No activity yet</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
                             Start solving problems, synthesizing documents, or taking quizzes!
                         </p>
                         <Button asChild>

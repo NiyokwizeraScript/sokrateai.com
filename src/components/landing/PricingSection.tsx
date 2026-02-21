@@ -55,26 +55,18 @@ const plans: Plan[] = [
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="py-24 md:py-32 relative bg-white">
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-green-500/5 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-green-500/3 blur-3xl" />
-      </div>
-
+    <section id="pricing" className="py-16 sm:py-20 md:py-24 lg:py-32 relative bg-slate-50/50">
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-slate-900">
+        <div className="text-center mb-10 sm:mb-16">
+          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 text-slate-900">
             Simple, Transparent <span className="text-gradient">Pricing</span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Start free and upgrade when you need more power
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-1">
+            Start free and upgrade when you need more
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 max-w-4xl mx-auto">
           {plans.map((plan, index) => (
             <PricingCard key={plan.name} plan={plan} index={index} />
           ))}
@@ -92,57 +84,53 @@ function PricingCard({
   index: number;
 }) {
   return (
-    <div
-      className={cn(
-        "relative animate-fade-in",
-        plan.highlighted && "md:-mt-4 md:mb-4"
-      )}
+<div
+        className={cn(
+          "relative",
+          plan.highlighted && "md:-mt-4 md:mb-4"
+        )}
       style={{ animationDelay: `${index * 0.1}s` }}
     >
-      {/* Popular badge */}
       {plan.highlighted ? (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-600 text-white text-sm font-medium">
-            <Sparkles className="w-3.5 h-3.5" />
+        <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 z-10">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 rounded-full bg-green-600 text-white text-xs sm:text-sm font-medium">
+            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
             Most Popular
           </div>
         </div>
       ) : null}
 
-      {/* Card glow for highlighted */}
       {plan.highlighted ? (
-        <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-green-500/50 to-green-400/50 blur-sm" />
+        <div className="absolute -inset-px rounded-xl sm:rounded-2xl bg-gradient-to-b from-green-500/50 to-green-400/50 blur-sm" aria-hidden />
       ) : null}
 
       <div
         className={cn(
-          "relative h-full rounded-2xl p-6 lg:p-8 transition-all duration-300 border",
+          "relative h-full rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 transition-all duration-300 border",
           plan.highlighted
-            ? "bg-white border-2 border-primary shadow-lg"
+            ? "bg-white border-2 border-green-600 shadow-lg"
             : "bg-white border-slate-200"
         )}
       >
-        {/* Plan name and price */}
-        <div className="mb-6">
-          <h3 className="font-heading text-xl font-bold mb-2 text-slate-900">{plan.name}</h3>
+        <div className="mb-5 sm:mb-6">
+          <h3 className="font-heading text-lg sm:text-xl font-bold mb-1.5 text-slate-900">{plan.name}</h3>
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-heading font-bold text-slate-900">{plan.price}</span>
-            <span className="text-gray-600">/{plan.period}</span>
+            <span className="text-3xl sm:text-4xl font-heading font-bold text-slate-900">{plan.price}</span>
+            <span className="text-gray-600 text-sm sm:text-base">/{plan.period}</span>
           </div>
-          <p className="text-sm text-gray-600 mt-2">{plan.description}</p>
+          <p className="text-sm text-gray-600 mt-1.5">{plan.description}</p>
         </div>
 
-        {/* Features list */}
-        <ul className="space-y-3 mb-8">
+        <ul className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-8">
           {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-3">
+            <li key={idx} className="flex items-start gap-2.5 sm:gap-3">
               {feature.included ? (
-                <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 shrink-0 mt-0.5" />
               ) : (
-                <X className="w-5 h-5 text-gray-300 shrink-0 mt-0.5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 shrink-0 mt-0.5" />
               )}
               <span className={cn(
-                "text-sm",
+                "text-xs sm:text-sm",
                 feature.included ? "text-gray-700" : "text-gray-400"
               )}>
                 {feature.text}
@@ -151,13 +139,12 @@ function PricingCard({
           ))}
         </ul>
 
-        {/* CTA */}
         <Button
           className={cn(
-            "w-full transition-all duration-200",
+            "w-full h-11 sm:h-12 min-h-[44px] transition-all duration-200",
             plan.highlighted
-              ? "bg-primary hover:bg-primary/90 text-white"
-              : "bg-white border border-slate-300 text-slate-700 hover:border-primary hover:text-primary hover:bg-primary/5"
+              ? "bg-green-600 hover:bg-green-700 text-white"
+              : "bg-white border border-slate-300 text-slate-700 hover:border-green-600 hover:text-green-600 hover:bg-green-50"
           )}
           variant={plan.highlighted ? "default" : "outline"}
           asChild

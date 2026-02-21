@@ -198,11 +198,12 @@ const Sidebar = React.forwardRef<
                 ref={ref}
                 className="group/sidebar-wrapper flex h-full md:w-auto has-[[data-state=collapsed]]:w-[var(--sidebar-width-icon)]"
                 data-state={state}
+                data-collapsible={collapsible === "icon" && state === "collapsed" ? "icon" : undefined}
                 {...props}
             >
                 <div
                     className={cn(
-                        "relative hidden h-full w-[var(--sidebar-width)] flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out md:flex",
+                        "relative hidden h-full w-[var(--sidebar-width)] flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out md:flex overflow-hidden",
                         state === "collapsed" && "w-[var(--sidebar-width-icon)]",
                         className
                     )}
@@ -383,7 +384,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-    "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md px-2 py-1.5 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-sub]]/menu-item:pt-0 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]/sidebar-wrapper:!size-8 group-data-[collapsible=icon]/sidebar-wrapper:!p-0 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+    "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md px-2 py-1.5 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-sub]]/menu-item:pt-0 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]/sidebar-wrapper:!size-8 group-data-[collapsible=icon]/sidebar-wrapper:!min-w-8 group-data-[collapsible=icon]/sidebar-wrapper:!min-h-8 group-data-[collapsible=icon]/sidebar-wrapper:!w-8 group-data-[collapsible=icon]/sidebar-wrapper:!h-8 group-data-[collapsible=icon]/sidebar-wrapper:!p-0 group-data-[collapsible=icon]/sidebar-wrapper:!justify-center group-data-[collapsible=icon]/sidebar-wrapper:!aspect-square [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
     {
         variants: {
             variant: {

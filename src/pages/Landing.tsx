@@ -9,7 +9,7 @@ import { LandingNav } from "@/components/landing/LandingNav";
 
 export default function Landing() {
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white overflow-x-hidden">
             <LandingNav />
             <HeroSection />
             <FeaturesSection />

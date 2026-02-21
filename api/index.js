@@ -26,8 +26,11 @@ const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-// Initialize Stripe Client
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Initialize Stripe Client (only when key is set - avoids crash in dev without Stripe)
+const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
+const stripe = stripeKey && stripeKey.startsWith('sk_')
+    ? new Stripe(stripeKey)
+    : null;
 
 // Model ID - Haiku (Fallback)
 const MODEL_ID = "claude-3-haiku-20240307";
@@ -172,6 +175,9 @@ app.post('/api/synthesize', async (req, res) => {
 
 // Stripe Checkout Session Endpoint
 app.post('/api/create-checkout-session', async (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: 'Stripe is not configured. Add STRIPE_SECRET_KEY to .env' });
+    }
     try {
         const { lookup_key } = req.body;
         // If coming from form, lookup_key is in body.

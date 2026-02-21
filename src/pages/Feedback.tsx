@@ -35,8 +35,8 @@ export default function Feedback() {
                         <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                             <Check className="h-8 w-8 text-green-600" />
                         </div>
-                        <h2 className="text-xl font-heading font-bold text-slate-900 mb-2">Thank you!</h2>
-                        <p className="text-gray-600 mb-6">Your feedback has been submitted successfully.</p>
+                        <h2 className="text-xl font-heading font-bold text-foreground mb-2">Thank you!</h2>
+                        <p className="text-muted-foreground mb-6">Your feedback has been submitted successfully.</p>
                         <Button onClick={() => { setSubmitted(false); setSubject(""); setMessage(""); }}>
                             Send Another
                         </Button>
@@ -53,9 +53,9 @@ export default function Feedback() {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
                         <MessageSquare className="h-5 w-5 text-white" />
                     </div>
-                    <h1 className="text-2xl font-heading font-bold text-slate-900">Feedback</h1>
+                    <h1 className="text-2xl font-heading font-bold text-foreground">Feedback</h1>
                 </div>
-                <p className="text-gray-600">Help us improve Sokrate AI with your feedback.</p>
+                <p className="text-muted-foreground">Help us improve Sokrate AI with your feedback.</p>
             </div>
 
             <Card>

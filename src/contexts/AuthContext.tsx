@@ -12,6 +12,8 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
+import { getDoc, doc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface AuthContextType {
   user: User | null;
@@ -27,8 +29,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        try {
+          const userRef = doc(db, "users", currentUser.uid);
+          const snap = await getDoc(userRef);
+          const now = new Date().toISOString();
+          if (!snap.exists()) {
+            await setDoc(userRef, {
+              displayName: currentUser.displayName ?? undefined,
+              email: currentUser.email ?? undefined,
+              photoURL: currentUser.photoURL ?? undefined,
+              plan: "free",
+              createdAt: now,
+              updatedAt: now,
+            });
+          } else {
+            await setDoc(
+              userRef,
+              {
+                displayName: currentUser.displayName ?? undefined,
+                email: currentUser.email ?? undefined,
+                photoURL: currentUser.photoURL ?? undefined,
+                updatedAt: now,
+              },
+              { merge: true }
+            );
+          }
+        } catch (e) {
+          console.error("Failed to sync user profile", e);
+        }
+      }
       setLoading(false);
     });
     return () => unsubscribe();

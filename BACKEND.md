@@ -1,0 +1,56 @@
+# Backend storage (Firestore) – production
+
+Sokrate uses **Firebase Firestore** in **production mode**. The app has a Firestore client and helpers in `src/lib/firestore.ts`.
+
+## 1. Firestore is already enabled (production mode)
+
+You created the database in production mode, so **no one can read or write until you deploy security rules**. Do that next.
+
+## 2. Deploy security rules (required)
+
+The project includes **`firestore.rules`** in the repo root. Use one of these:
+
+**Option A – Firebase Console (quick)**  
+1. Open [Firebase Console](https://console.firebase.google.com/) → your project → **Build → Firestore Database**.  
+2. Go to the **Rules** tab.  
+3. Copy the contents of **`firestore.rules`** from this repo and paste into the editor.  
+4. Click **Publish**.
+
+**Option B – Firebase CLI**  
+1. Install CLI: `npm i -g firebase-tools` and `firebase login`.  
+2. In the project root: `firebase init firestore` (pick existing project, use `firestore.rules` as the rules file).  
+3. Deploy: `firebase deploy --only firestore:rules`.
+
+Rules summary:
+- **`users/{userId}`** – only the signed-in user with that `userId` can read/write their own document.  
+- **`users/{userId}/*`** – same for any subcollection (e.g. history, quizzes).  
+- **`feedback/{id}`** – any signed-in user can create; only the document’s `userId` (or an admin) can read/update/delete.
+
+## 3. What the app already does
+
+- **`src/lib/firebase.ts`** – initializes Firestore and exports `db`.
+- **`src/lib/firestore.ts`** – helpers:
+  - `getUserProfile(uid)` – read user profile from `users/{uid}`.
+  - `setUserProfile(uid, data)` – create or update `users/{uid}` (merge).
+
+Profile shape: `displayName`, `email`, `photoURL`, `theme`, `plan` (`"free"` | `"pro"`), `createdAt`, `updatedAt`. **Subscription:** Stripe is source of truth; `plan` is cached in Firestore so the app can gate features. Set to `"pro"` after successful checkout (see CheckoutPro) or via a Stripe webhook for reliability.
+
+## 4. Using it in the app
+
+- **After login:** get the user’s UID from Firebase Auth (`user.uid`), then call `getUserProfile(user.uid)` or `setUserProfile(user.uid, { displayName: user.displayName, ... })` to create/update the profile.
+- **Theme:** you can persist `theme` in the user document and apply it on load (e.g. in `Account` or a layout effect).
+- **History / quizzes / feedback:** add new collections or subcollections (e.g. `users/{uid}/history`, `users/{uid}/quizAttempts`, or a top-level `feedback` collection with `userId`). Use `doc`, `getDoc`, `setDoc`, `getDocs`, `collection`, `query`, `where` from `firebase/firestore` in the same way.
+
+## 5. Plan gating (free vs pro)
+
+- **Free:** Can access **Quizzes** (unlimited), **Account** (settings/theme). Sidebar shows only those + "Upgrade to Pro".
+- **Pro:** Can access Dashboard, Solver, Synthesizer, Quizzes, History, Feedback, Account. Recent activity and study history show their data (once you wire up Firestore for those collections).
+- **Setting plan to pro:** After Stripe checkout success, the app calls `setUserProfile(uid, { plan: "pro" })` (see CheckoutPro). For production you can also use a Stripe webhook to set `plan: "pro"` when a subscription is created.
+
+## 6. Sync profile on login (done)
+
+AuthContext already syncs profile on login: creates a user doc with `plan: "free"` for new users; for existing users merges displayName, email, photoURL (never overwrites `plan`, so Pro stays Pro).
+
+---
+
+**Summary:** Enable Firestore in the Firebase project, set security rules, then use `getUserProfile` / `setUserProfile` and the same patterns for any new collections (history, quizzes, feedback, subscription cache).

@@ -137,9 +137,9 @@ export default function Quizzes() {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
                         <Trophy className="h-5 w-5 text-white" />
                     </div>
-                    <h1 className="text-2xl font-heading font-bold text-slate-900">The Quizzes</h1>
+                    <h1 className="text-2xl font-heading font-bold text-foreground">The Quizzes</h1>
                 </div>
-                <p className="text-gray-600">Upload a document and generate a quiz to test your knowledge.</p>
+                <p className="text-muted-foreground">Upload a document and generate a quiz to test your knowledge.</p>
             </div>
 
             <div className="grid gap-6">
@@ -159,31 +159,31 @@ export default function Quizzes() {
 
                             {!file ? (
                                 <div
-                                    className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                                    className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
                                     onClick={() => fileInputRef.current?.click()}
                                 >
-                                    <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-                                    <p className="font-medium text-gray-700">Upload your study material</p>
-                                    <p className="text-sm text-gray-500 mt-1">PDF, images, or text documents</p>
+                                    <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                                    <p className="font-medium text-foreground">Upload your study material</p>
+                                    <p className="text-sm text-muted-foreground mt-1">PDF, images, or text documents</p>
                                 </div>
                             ) : (
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <div className="flex items-center justify-between p-3 bg-muted rounded-xl">
                                     <div className="flex items-center gap-3">
                                         <FileUp className="h-6 w-6 text-primary" />
                                         <div>
-                                            <p className="font-medium text-sm">{file.name}</p>
-                                            <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                                            <p className="font-medium text-sm text-foreground">{file.name}</p>
+                                            <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
                                         </div>
                                     </div>
                                     <button onClick={() => setFile(null)}>
-                                        <X className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                                        <X className="h-4 w-4 text-muted-foreground hover:text-red-500" />
                                     </button>
                                 </div>
                             )}
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-1.5 block">Difficulty</label>
+                                    <label className="text-sm font-medium text-foreground mb-1.5 block">Difficulty</label>
                                     <Select value={difficulty} onValueChange={setDifficulty}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
@@ -194,7 +194,7 @@ export default function Quizzes() {
                                     </Select>
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-1.5 block">Questions</label>
+                                    <label className="text-sm font-medium text-foreground mb-1.5 block">Questions</label>
                                     <Select value={questionCount} onValueChange={setQuestionCount}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>

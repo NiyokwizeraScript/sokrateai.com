@@ -22,11 +22,13 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
 import CookiePolicy from "@/pages/CookiePolicy";
 import PricingSelection from "@/pages/PricingSelection";
+import Account from "@/pages/Account";
 
 const queryClient = new QueryClient();
 
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { ProRoute } from "@/components/auth/ProRoute";
 
 function App() {
   return (
@@ -56,12 +58,13 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/solver" element={<Solver />} />
-              <Route path="/synthesizer" element={<Synthesizer />} />
+              <Route path="/dashboard" element={<ProRoute><Dashboard /></ProRoute>} />
+              <Route path="/solver" element={<ProRoute><Solver /></ProRoute>} />
+              <Route path="/synthesizer" element={<ProRoute><Synthesizer /></ProRoute>} />
               <Route path="/quizzes" element={<Quizzes />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/feedback" element={<Feedback />} />
+              <Route path="/history" element={<ProRoute><History /></ProRoute>} />
+              <Route path="/feedback" element={<ProRoute><Feedback /></ProRoute>} />
+              <Route path="/account" element={<Account />} />
             </Route>
 
             {/* Catch all */}
