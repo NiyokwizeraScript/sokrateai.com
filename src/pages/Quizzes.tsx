@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,6 +8,8 @@ import { Trophy, Upload, Sparkles, Loader2, FileUp, X, Check, XCircle } from "lu
 import { validateFile, formatFileSize } from "@/lib/file-extractors";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { addHistoryItem } from "@/lib/firestore";
 
 interface QuizQuestion {
     id: number;
@@ -37,6 +40,8 @@ const sampleQuestions: QuizQuestion[] = [
 ];
 
 export default function Quizzes() {
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
     const [file, setFile] = useState<File | null>(null);
     const [difficulty, setDifficulty] = useState("medium");
     const [questionCount, setQuestionCount] = useState("5");
@@ -128,6 +133,16 @@ export default function Quizzes() {
             title: `Score: ${correct}/${total}`,
             description: correct === total ? "Perfect score! 🎉" : "Keep studying! You'll get there.",
         });
+        if (user?.uid) {
+          const title = file ? `Quiz: ${file.name}` : "Quiz completed";
+          const summary = `Score: ${correct}/${total}`;
+          addHistoryItem(user.uid, { type: "quiz", title, summary })
+            .then(() => {
+              queryClient.invalidateQueries({ queryKey: ["recentActivity", user.uid] });
+              queryClient.invalidateQueries({ queryKey: ["studyHistory", user.uid] });
+            })
+            .catch(() => {});
+        }
     };
 
     return (

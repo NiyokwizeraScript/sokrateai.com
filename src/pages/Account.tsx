@@ -1,12 +1,16 @@
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Mail, Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { User, Mail, Palette, Sparkles, Crown } from "lucide-react";
 
 export default function Account() {
   const { user } = useAuth();
+  const { isPro, isLoading: profileLoading } = useUserProfile();
 
   const initials = user?.displayName
     ? user.displayName
@@ -68,13 +72,53 @@ export default function Account() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Subscription</CardTitle>
-          <CardDescription>Manage your plan and billing (coming soon).</CardDescription>
+          <CardTitle className="flex items-center gap-2">Subscription</CardTitle>
+          <CardDescription>
+            Your current plan and access level.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Subscription status and plan management will appear here once connected to the backend.
-          </p>
+        <CardContent className="space-y-4">
+          {profileLoading ? (
+            <p className="text-sm text-muted-foreground">Loading plan…</p>
+          ) : (
+            <>
+              <div className="flex items-center gap-3">
+                {isPro ? (
+                  <>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Crown className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">Pro</p>
+                      <p className="text-sm text-muted-foreground">
+                        Full access to Solver, Synthesizer, History, and Feedback.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                      <User className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">Free</p>
+                      <p className="text-sm text-muted-foreground">
+                        Quizzes and Account. Upgrade for Solver, Synthesizer, History, and Feedback.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+              {!isPro && (
+                <Button asChild className="bg-gradient-to-r from-emerald-600 via-green-500 to-teal-600 text-white hover:opacity-95 border-0 shadow-md">
+                  <Link to="/pricing-selection" className="gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Upgrade to Pro
+                  </Link>
+                </Button>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

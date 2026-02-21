@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,8 +8,12 @@ import { cn } from "@/lib/utils";
 import { validateFile, formatFileSize } from "@/lib/file-extractors";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { addHistoryItem } from "@/lib/firestore";
 
 export default function Solver() {
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
     const [problem, setProblem] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +72,16 @@ export default function Solver() {
             });
 
             setSolution(response.solution);
+
+            if (user?.uid) {
+              const title = problem.trim().slice(0, 60) || (file ? `Problem: ${file.name}` : "Problem solved");
+              const summary = response.solution.slice(0, 200);
+              try {
+                await addHistoryItem(user.uid, { type: "solver", title, summary });
+                await queryClient.invalidateQueries({ queryKey: ["recentActivity", user.uid] });
+                await queryClient.invalidateQueries({ queryKey: ["studyHistory", user.uid] });
+              } catch (_) { /* non-blocking */ }
+            }
         } catch (error) {
             console.error(error);
             toast({

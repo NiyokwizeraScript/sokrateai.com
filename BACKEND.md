@@ -35,19 +35,28 @@ Rules summary:
 
 Profile shape: `displayName`, `email`, `photoURL`, `theme`, `plan` (`"free"` | `"pro"`), `createdAt`, `updatedAt`. **Subscription:** Stripe is source of truth; `plan` is cached in Firestore so the app can gate features. Set to `"pro"` after successful checkout (see CheckoutPro) or via a Stripe webhook for reliability.
 
-## 4. Using it in the app
+## 4. Collections in use
+
+- **`users/{uid}`** – profile (getUserProfile, setUserProfile).
+- **`users/{uid}/history`** – study history & recent activity. Each doc: `type` ("solver" | "synthesizer" | "quiz"), `title`, `summary` (optional), `createdAt` (ISO string). Helper functions: `addHistoryItem`, `getRecentActivity(uid, limit)`, `getStudyHistory(uid)`, `deleteHistoryItem(uid, itemId)`.
+- **`feedback`** – top-level. Each doc: `userId`, `type` ("feedback" | "bug" | "feature"), `subject`, `message`, `createdAt`. Helpers: `createFeedback`, `getUserFeedback(uid)`, `deleteFeedbackItem(id)`.
+
+**Firestore index:** The query for "your feedback" uses `where("userId", "==", uid)` and `orderBy("createdAt", "desc")`. If the first load fails with an index error, open the link in the error message to create the composite index in the Firebase Console.
+
+## 5. Using it in the app
 
 - **After login:** get the user’s UID from Firebase Auth (`user.uid`), then call `getUserProfile(user.uid)` or `setUserProfile(user.uid, { displayName: user.displayName, ... })` to create/update the profile.
 - **Theme:** you can persist `theme` in the user document and apply it on load (e.g. in `Account` or a layout effect).
-- **History / quizzes / feedback:** add new collections or subcollections (e.g. `users/{uid}/history`, `users/{uid}/quizAttempts`, or a top-level `feedback` collection with `userId`). Use `doc`, `getDoc`, `setDoc`, `getDocs`, `collection`, `query`, `where` from `firebase/firestore` in the same way.
+- **Recent activity:** Dashboard shows last 5 items from `users/{uid}/history`; History page shows all. Solver, Synthesizer, and Quizzes call `addHistoryItem` on success. Users can delete items from Dashboard or History.
+- **Feedback:** Feedback page submits to `feedback` and lists the current user’s feedback with delete.
 
-## 5. Plan gating (free vs pro)
+## 6. Plan gating (free vs pro)
 
 - **Free:** Can access **Quizzes** (unlimited), **Account** (settings/theme). Sidebar shows only those + "Upgrade to Pro".
-- **Pro:** Can access Dashboard, Solver, Synthesizer, Quizzes, History, Feedback, Account. Recent activity and study history show their data (once you wire up Firestore for those collections).
+- **Pro:** Can access Dashboard, Solver, Synthesizer, Quizzes, History, Feedback, Account. Recent activity and study history are stored in Firestore and shown on Dashboard and History with delete support; feedback is stored and listed on the Feedback page.
 - **Setting plan to pro:** After Stripe checkout success, the app calls `setUserProfile(uid, { plan: "pro" })` (see CheckoutPro). For production you can also use a Stripe webhook to set `plan: "pro"` when a subscription is created.
 
-## 6. Sync profile on login (done)
+## 7. Sync profile on login (done)
 
 AuthContext already syncs profile on login: creates a user doc with `plan: "free"` for new users; for existing users merges displayName, email, photoURL (never overwrites `plan`, so Pro stays Pro).
 

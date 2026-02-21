@@ -1,12 +1,17 @@
 import { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, Sparkles, Loader2, FileUp, X } from "lucide-react";
 import { validateFile, formatFileSize } from "@/lib/file-extractors";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { addHistoryItem } from "@/lib/firestore";
 
 export default function Synthesizer() {
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [synthesis, setSynthesis] = useState<string | null>(null);
@@ -62,6 +67,15 @@ export default function Synthesizer() {
 
             setSynthesis(response.synthesis);
 
+            if (user?.uid && file) {
+              const title = `Synthesized: ${file.name}`;
+              const summary = response.synthesis.slice(0, 200);
+              try {
+                await addHistoryItem(user.uid, { type: "synthesizer", title, summary });
+                await queryClient.invalidateQueries({ queryKey: ["recentActivity", user.uid] });
+                await queryClient.invalidateQueries({ queryKey: ["studyHistory", user.uid] });
+              } catch (_) { /* non-blocking */ }
+            }
         } catch (error) {
             console.error(error);
             toast({
