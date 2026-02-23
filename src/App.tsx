@@ -10,6 +10,10 @@ import Login from "@/pages/Login";
 import VerifyOtp from "@/pages/VerifyOtp";
 import Onboarding from "@/pages/Onboarding";
 import Dashboard from "@/pages/Dashboard";
+import NotesDashboard from "@/pages/NotesDashboard";
+import NoteView from "@/pages/NoteView";
+import NoteQuizView from "@/pages/NoteQuizView";
+import SharedNoteView from "@/pages/SharedNoteView";
 import Solver from "@/pages/Solver";
 import Synthesizer from "@/pages/Synthesizer";
 import Quizzes from "@/pages/Quizzes";
@@ -58,7 +62,11 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route path="/dashboard" element={<ProRoute><Dashboard /></ProRoute>} />
+              <Route path="/dashboard" element={<NotesDashboard />} />
+              <Route path="/notes/:noteId" element={<NoteView />} />
+              <Route path="/notes/:noteId/quiz" element={<NoteQuizView />} />
+              <Route path="/shared/:shareId" element={<SharedNoteView />} />
+              <Route path="/tools/dashboard" element={<ProRoute><Dashboard /></ProRoute>} />
               <Route path="/solver" element={<ProRoute><Solver /></ProRoute>} />
               <Route path="/synthesizer" element={<ProRoute><Synthesizer /></ProRoute>} />
               <Route path="/quizzes" element={<Quizzes />} />

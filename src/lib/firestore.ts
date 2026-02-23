@@ -166,3 +166,166 @@ export async function deleteFeedbackItem(feedbackId: string): Promise<void> {
   const ref = doc(db, FEEDBACK_COLLECTION, feedbackId);
   await deleteDoc(ref);
 }
+
+// --- Notes (users/{uid}/notes) ---
+export type NoteSourceType = "blank" | "document" | "youtube";
+
+export interface NoteRecord {
+  id: string;
+  sourceType: NoteSourceType;
+  title: string;
+  content: string;
+  sourceUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const NOTES_SUBCOLLECTION = "notes";
+
+export async function createNote(
+  uid: string,
+  data: { sourceType: NoteSourceType; title?: string; content?: string; sourceUrl?: string }
+): Promise<string> {
+  const ref = collection(db, USERS_COLLECTION, uid, NOTES_SUBCOLLECTION);
+  const now = new Date().toISOString();
+  const docRef = await addDoc(ref, {
+    sourceType: data.sourceType,
+    title: data.title ?? "Untitled note",
+    content: data.content ?? "",
+    sourceUrl: data.sourceUrl ?? null,
+    createdAt: now,
+    updatedAt: now,
+  });
+  return docRef.id;
+}
+
+export async function getNote(uid: string, noteId: string): Promise<NoteRecord | null> {
+  const ref = doc(db, USERS_COLLECTION, uid, NOTES_SUBCOLLECTION, noteId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  const x = snap.data();
+  return {
+    id: snap.id,
+    sourceType: (x.sourceType as NoteSourceType) ?? "blank",
+    title: x.title ?? "",
+    content: x.content ?? "",
+    sourceUrl: x.sourceUrl,
+    createdAt: x.createdAt ?? "",
+    updatedAt: x.updatedAt ?? "",
+  };
+}
+
+export async function updateNote(
+  uid: string,
+  noteId: string,
+  data: { title?: string; content?: string }
+): Promise<void> {
+  const ref = doc(db, USERS_COLLECTION, uid, NOTES_SUBCOLLECTION, noteId);
+  await setDoc(ref, { ...data, updatedAt: new Date().toISOString() }, { merge: true });
+}
+
+export async function getUserNotes(uid: string): Promise<NoteRecord[]> {
+  const ref = collection(db, USERS_COLLECTION, uid, NOTES_SUBCOLLECTION);
+  const q = query(ref, orderBy("updatedAt", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const x = d.data();
+    return {
+      id: d.id,
+      sourceType: (x.sourceType as NoteSourceType) ?? "blank",
+      title: x.title ?? "",
+      content: x.content ?? "",
+      sourceUrl: x.sourceUrl,
+      createdAt: x.createdAt ?? "",
+      updatedAt: x.updatedAt ?? "",
+    };
+  });
+}
+
+export async function deleteNote(uid: string, noteId: string): Promise<void> {
+  const ref = doc(db, USERS_COLLECTION, uid, NOTES_SUBCOLLECTION, noteId);
+  await deleteDoc(ref);
+}
+
+// --- Shared notes (top-level: recipient can read by email) ---
+export interface SharedNoteRecord {
+  id: string;
+  fromUserId: string;
+  fromUserEmail: string;
+  fromUserName?: string;
+  noteId: string;
+  noteTitle: string;
+  toEmail: string;
+  createdAt: string;
+  /** Stored so recipient can view without access to owner's notes */
+  noteContent?: string;
+}
+
+const SHARED_NOTES_COLLECTION = "sharedNotes";
+
+export async function shareNoteToEmail(
+  fromUserId: string,
+  data: {
+    fromUserEmail: string;
+    fromUserName?: string;
+    noteId: string;
+    noteTitle: string;
+    toEmail: string;
+    noteContent?: string;
+  }
+): Promise<string> {
+  const ref = collection(db, SHARED_NOTES_COLLECTION);
+  const docRef = await addDoc(ref, {
+    fromUserId,
+    fromUserEmail: data.fromUserEmail,
+    fromUserName: data.fromUserName ?? null,
+    noteId: data.noteId,
+    noteTitle: data.noteTitle,
+    toEmail: data.toEmail.toLowerCase().trim(),
+    noteContent: data.noteContent ?? null,
+    createdAt: new Date().toISOString(),
+  });
+  return docRef.id;
+}
+
+export async function getSharedWithMe(userEmail: string): Promise<SharedNoteRecord[]> {
+  const ref = collection(db, SHARED_NOTES_COLLECTION);
+  const q = query(
+    ref,
+    where("toEmail", "==", userEmail.toLowerCase().trim()),
+    orderBy("createdAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const x = d.data();
+    return {
+      id: d.id,
+      fromUserId: x.fromUserId ?? "",
+      fromUserEmail: x.fromUserEmail ?? "",
+      fromUserName: x.fromUserName,
+      noteId: x.noteId ?? "",
+      noteTitle: x.noteTitle ?? "",
+      toEmail: x.toEmail ?? "",
+      createdAt: x.createdAt ?? "",
+      noteContent: x.noteContent,
+    };
+  });
+}
+
+export async function getSharedNote(shareId: string): Promise<SharedNoteRecord | null> {
+  const ref = doc(db, SHARED_NOTES_COLLECTION, shareId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  const x = snap.data();
+  return {
+    id: snap.id,
+    fromUserId: x.fromUserId ?? "",
+    fromUserEmail: x.fromUserEmail ?? "",
+    fromUserName: x.fromUserName,
+    noteId: x.noteId ?? "",
+    noteTitle: x.noteTitle ?? "",
+    toEmail: x.toEmail ?? "",
+    createdAt: x.createdAt ?? "",
+    noteContent: x.noteContent,
+  };
+}

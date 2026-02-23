@@ -14,7 +14,9 @@ export function DashboardLayout() {
                     <div className="flex items-center gap-2">
                         <SidebarTrigger className="-ml-1" />
                         <Separator orientation="vertical" className="mr-2 h-4" />
-                        <span className="text-sm font-medium text-muted-foreground">Sokrate AI</span>
+                        <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                            Sokrate AI
+                        </Link>
                     </div>
                     <div className="flex items-center gap-1">
                         <ThemeToggle />

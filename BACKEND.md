@@ -40,8 +40,10 @@ Profile shape: `displayName`, `email`, `photoURL`, `theme`, `plan` (`"free"` | `
 - **`users/{uid}`** – profile (getUserProfile, setUserProfile).
 - **`users/{uid}/history`** – study history & recent activity. Each doc: `type` ("solver" | "synthesizer" | "quiz"), `title`, `summary` (optional), `createdAt` (ISO string). Helper functions: `addHistoryItem`, `getRecentActivity(uid, limit)`, `getStudyHistory(uid)`, `deleteHistoryItem(uid, itemId)`.
 - **`feedback`** – top-level. Each doc: `userId`, `type` ("feedback" | "bug" | "feature"), `subject`, `message`, `createdAt`. Helpers: `createFeedback`, `getUserFeedback(uid)`, `deleteFeedbackItem(id)`.
+- **`users/{uid}/notes`** – notes (sourceType: blank | document | youtube), `title`, `content`, `sourceUrl?`, `createdAt`, `updatedAt`. Helpers: `createNote`, `getNote`, `updateNote`, `getUserNotes`, `deleteNote`.
+- **`sharedNotes`** – shared note records: `fromUserId`, `fromUserEmail`, `noteId`, `noteTitle`, `toEmail`, `noteContent?`, `createdAt`. Recipient can read if `toEmail` matches their auth email. Helpers: `shareNoteToEmail`, `getSharedWithMe(email)`, `getSharedNote(shareId)`.
 
-**Firestore index:** The query for "your feedback" uses `where("userId", "==", uid)` and `orderBy("createdAt", "desc")`. If the first load fails with an index error, open the link in the error message to create the composite index in the Firebase Console.
+**Firestore indexes:** If you get an index error, use the link in the error to create it. Typical: `feedback` (userId + createdAt), `sharedNotes` (toEmail + createdAt), `users/{uid}/notes` (updatedAt).
 
 ## 5. Using it in the app
 

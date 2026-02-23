@@ -15,5 +15,12 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null
         && (resource.data.userId == request.auth.uid || request.auth.token.admin == true);
     }
+    // Shared notes: create when authenticated; read if recipient (toEmail matches token email)
+    match /sharedNotes/{shareId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && resource.data.toEmail == request.auth.token.email;
+      allow delete: if request.auth != null && resource.data.fromUserId == request.auth.uid;
+    }
   }
 }

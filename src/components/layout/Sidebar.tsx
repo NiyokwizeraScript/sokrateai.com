@@ -37,7 +37,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { cn } from "@/lib/utils";
 
 const navItems: { title: string; icon: typeof LayoutDashboard; href: string; proOnly?: boolean }[] = [
-  { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard", proOnly: true },
+  { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   { title: "The Solver", icon: ScanLine, href: "/solver", proOnly: true },
   { title: "The Synthesizer", icon: FileText, href: "/synthesizer", proOnly: true },
   { title: "The Quizzes", icon: Trophy, href: "/quizzes" },
