@@ -73,7 +73,7 @@ export function RichNoteEditor({
     let foreColor = document.queryCommandValue("foreColor") || "";
     if (foreColor && foreColor.startsWith("rgb")) {
       const m = foreColor.match(/\d+/g);
-      if (m?.length >= 3) foreColor = "#" + m.slice(0, 3).map((x) => Number(x).toString(16).padStart(2, "0")).join("");
+      if (m && m.length >= 3) foreColor = "#" + m.slice(0, 3).map((x) => Number(x).toString(16).padStart(2, "0")).join("");
     }
     setToolbarState((s) => (s.bold === bold && s.italic === italic && s.underline === underline && s.foreColor === foreColor ? s : { bold, italic, underline, foreColor }));
   }, []);
