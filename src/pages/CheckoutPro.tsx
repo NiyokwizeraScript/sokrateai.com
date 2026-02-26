@@ -47,7 +47,7 @@ const ProductDisplay = () => (
       <input
         type="hidden"
         name="lookup_key"
-        value="price_1T1zskPu6EUSAVsl2dymo8KQ"
+        value={import.meta.env.VITE_STRIPE_PRICE_ID || "price_1T1zskPu6EUSAVsl2dymo8KQ"}
       />
       <Button
         type="submit"

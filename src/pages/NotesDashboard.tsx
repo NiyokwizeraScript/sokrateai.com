@@ -129,7 +129,14 @@ export default function NotesDashboard() {
       navigate(`/notes/${noteId}`);
     } catch (err) {
       console.error(err);
-      toast({ title: "Error", description: "Could not process document.", variant: "destructive" });
+      const message = err instanceof Error ? err.message : "Could not process document.";
+      toast({
+        title: "Error",
+        description: message.includes("Failed to fetch") || message.includes("NetworkError")
+          ? "Network error. Check your connection and that the server is running."
+          : message,
+        variant: "destructive",
+      });
     } finally {
       setDocLoading(false);
     }
@@ -153,7 +160,14 @@ export default function NotesDashboard() {
       navigate(`/notes/${noteId}`);
     } catch (err) {
       console.error(err);
-      toast({ title: "Error", description: "Could not process link.", variant: "destructive" });
+      const message = err instanceof Error ? err.message : "Could not process link.";
+      toast({
+        title: "Error",
+        description: message.includes("Failed to fetch") || message.includes("NetworkError")
+          ? "Network error. Check your connection and that the server is running."
+          : message,
+        variant: "destructive",
+      });
     } finally {
       setYoutubeLoading(false);
     }

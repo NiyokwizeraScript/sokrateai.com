@@ -37,7 +37,10 @@ class ApiClient {
 
         if (!response.ok) {
             const error = await response.json().catch(() => ({ message: "Network error" }));
-            throw new Error(error.message || `HTTP ${response.status}`);
+            const message =
+                (error && (error.error || error.message)) ||
+                `Request failed (${response.status})`;
+            throw new Error(typeof message === "string" ? message : "Request failed");
         }
 
         return response.json();

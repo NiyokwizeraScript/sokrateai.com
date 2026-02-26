@@ -9,16 +9,17 @@ import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import VerifyOtp from "@/pages/VerifyOtp";
 import Onboarding from "@/pages/Onboarding";
-import Dashboard from "@/pages/Dashboard";
 import NotesDashboard from "@/pages/NotesDashboard";
 import NoteView from "@/pages/NoteView";
 import NoteQuizView from "@/pages/NoteQuizView";
 import SharedNoteView from "@/pages/SharedNoteView";
-import Solver from "@/pages/Solver";
-import Synthesizer from "@/pages/Synthesizer";
-import Quizzes from "@/pages/Quizzes";
-import History from "@/pages/History";
 import Feedback from "@/pages/Feedback";
+// Removed from nav – keep files in repo for later use:
+// import Dashboard from "@/pages/Dashboard";
+// import Solver from "@/pages/Solver";
+// import Synthesizer from "@/pages/Synthesizer";
+// import Quizzes from "@/pages/Quizzes";
+// import History from "@/pages/History";
 import NotFound from "@/pages/NotFound";
 import CheckoutPro from "@/pages/CheckoutPro";
 import FAQ from "@/pages/FAQ";
@@ -66,11 +67,7 @@ function App() {
               <Route path="/notes/:noteId" element={<NoteView />} />
               <Route path="/notes/:noteId/quiz" element={<NoteQuizView />} />
               <Route path="/shared/:shareId" element={<SharedNoteView />} />
-              <Route path="/tools/dashboard" element={<ProRoute><Dashboard /></ProRoute>} />
-              <Route path="/solver" element={<ProRoute><Solver /></ProRoute>} />
-              <Route path="/synthesizer" element={<ProRoute><Synthesizer /></ProRoute>} />
-              <Route path="/quizzes" element={<Quizzes />} />
-              <Route path="/history" element={<ProRoute><History /></ProRoute>} />
+              {/* Removed from nav – pages kept in src/pages/ for later: tools/dashboard, solver, synthesizer, quizzes, history */}
               <Route path="/feedback" element={<ProRoute><Feedback /></ProRoute>} />
               <Route path="/account" element={<Account />} />
             </Route>

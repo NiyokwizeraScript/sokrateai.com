@@ -205,13 +205,12 @@ export default function NoteView() {
       <Resizable direction="horizontal" className="flex-1 min-h-0">
         <ResizablePanel defaultSize={50} minSize={30}>
           <div className="h-full flex flex-col p-4 overflow-hidden">
-            <p className="text-xs text-muted-foreground mb-1">Your notes — use the toolbar for font, size, colour, bold, images</p>
             <p className="text-xs text-muted-foreground/80 mb-2">All changes and edits are auto-saved. No need to save manually.</p>
             <RichNoteEditor
               value={content}
               onChange={setContent}
               onBlur={handleSaveContent}
-              placeholder="Type your notes or use the toolbar above"
+              placeholder="Type your notes..."
               className="flex-1 min-h-0"
             />
           </div>

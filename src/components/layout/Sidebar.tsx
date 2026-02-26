@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -22,35 +23,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   LayoutDashboard,
-  ScanLine,
-  FileText,
-  History,
   LogOut,
   ChevronUp,
-  Trophy,
-  MessageSquare,
   UserCircle,
+  MessageSquare,
   Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
-const navItems: { title: string; icon: typeof LayoutDashboard; href: string; proOnly?: boolean }[] = [
+const baseNavItems: { title: string; icon: typeof LayoutDashboard; href: string }[] = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { title: "The Solver", icon: ScanLine, href: "/solver", proOnly: true },
-  { title: "The Synthesizer", icon: FileText, href: "/synthesizer", proOnly: true },
-  { title: "The Quizzes", icon: Trophy, href: "/quizzes" },
-  { title: "Study History", icon: History, href: "/history", proOnly: true },
-  { title: "Feedback", icon: MessageSquare, href: "/feedback", proOnly: true },
-  { title: "Account", icon: UserCircle, href: "/account" },
 ];
+const feedbackNavItem = { title: "Feedback", icon: MessageSquare, href: "/feedback" };
 
 export function AppSidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { isPro } = useUserProfile();
-  const visibleNavItems = navItems.filter((item) => !item.proOnly || isPro);
+  const navItems = [...baseNavItems, ...(isPro ? [feedbackNavItem] : [])];
 
   const userInitials = user?.displayName
     ? user.displayName
@@ -66,35 +59,18 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader className="p-4">
-        <Link to="/dashboard" className="flex items-center gap-3 group">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-lg bg-primary/20 blur-md" />
-            <img
-              src="/Sokrate AI.png"
-              alt="Sokrate AI"
-              className="relative h-9 w-9 object-contain drop-shadow-lg"
-            />
-          </div>
-          <div className="flex flex-col group-data-[collapsible=icon]/sidebar-wrapper:hidden overflow-hidden">
-            <span className="font-heading font-bold text-lg tracking-tight text-primary">
-              Sokrate AI
-            </span>
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              Science Lab
-            </span>
-          </div>
-        </Link>
+    <Sidebar variant="sidebar" collapsible="icon" className="min-h-svh flex flex-col">
+      <SidebarHeader className="p-4 flex items-center shrink-0">
+        <SidebarTrigger className="-ml-1" />
       </SidebarHeader>
 
       <SidebarSeparator />
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-2 flex-1 min-h-0">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {visibleNavItems.map((item) => {
+              {navItems.map((item) => {
                 const isActive =
                   location.pathname === item.href ||
                   location.pathname.startsWith(item.href + "/");
@@ -123,31 +99,25 @@ export function AppSidebar() {
                 );
               })}
             </SidebarMenu>
+            {!isPro && (
+              <div className="px-2 pt-6 group-data-[collapsible=icon]/sidebar-wrapper:px-0 group-data-[collapsible=icon]/sidebar-wrapper:flex group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
+                <Button asChild className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground group-data-[collapsible=icon]/sidebar-wrapper:!w-8 group-data-[collapsible=icon]/sidebar-wrapper:!min-w-8 group-data-[collapsible=icon]/sidebar-wrapper:!p-0 group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
+                  <Link to="/pricing-selection" className="flex items-center gap-2 overflow-hidden">
+                    <Sparkles className="h-4 w-4 shrink-0" />
+                    <span className="truncate group-data-[collapsible=icon]/sidebar-wrapper:hidden">Upgrade to Pro</span>
+                  </Link>
+                </Button>
+              </div>
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
-        {!isPro && (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem className="flex items-center group-data-[collapsible=icon]/sidebar-wrapper:justify-center min-h-8">
-                  <SidebarMenuButton
-                    asChild
-                    className="cta-premium relative !bg-gradient-to-r !from-emerald-600 !via-green-500 !to-teal-600 !text-white hover:!brightness-110 active:!scale-[0.98] shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-400/35 transition-all duration-200 border border-white/20 hover:border-white/30 outline outline-2 outline-emerald-400/50 outline-offset-1 hover:outline-emerald-300/60 hover:scale-[1.02]"
-                  >
-                    <Link to="/pricing-selection" className="focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md">
-                      <Sparkles className="h-4 w-4 shrink-0 drop-shadow-sm" />
-                      <span className="font-semibold truncate drop-shadow-sm group-data-[collapsible=icon]/sidebar-wrapper:hidden">Upgrade to Pro</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
-      <SidebarFooter className="p-2">
-        <SidebarSeparator className="mb-2" />
+      <SidebarFooter className="mt-auto shrink-0 p-2 flex flex-col gap-2">
+        <SidebarSeparator className="mb-0" />
+        <div className="flex items-center px-2 group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
+          <ThemeToggle />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

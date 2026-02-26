@@ -33,13 +33,13 @@ export default function PricingSelection() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-green-50/50 py-12 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-white to-green-50/50 dark:from-background dark:to-muted/30 py-12 px-4 flex items-center justify-center">
       <div className="max-w-5xl w-full">
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-4">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 dark:text-foreground mb-4">
             Choose Your Plan
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
             Select the plan that best fits your learning needs. You can upgrade
             at any time.
           </p>
@@ -47,19 +47,19 @@ export default function PricingSelection() {
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Free Plan */}
-          <Card className="border-slate-200 hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white">
+          <Card className="border-slate-200 dark:border-border hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white dark:bg-card">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span className="text-2xl font-bold font-heading">Free</span>
+                <span className="text-2xl font-bold font-heading text-foreground">Free</span>
               </CardTitle>
               <CardDescription>
                 Try out our quiz feature for free
               </CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold text-slate-900 font-heading">
+                <span className="text-4xl font-bold text-slate-900 dark:text-foreground font-heading">
                   $0
                 </span>
-                <span className="text-gray-600 ml-2">/forever</span>
+                <span className="text-gray-600 dark:text-muted-foreground ml-2">/forever</span>
               </div>
             </CardHeader>
             <CardContent>
@@ -76,13 +76,13 @@ export default function PricingSelection() {
                     {feature.included ? (
                       <Check className="h-5 w-5 text-primary shrink-0" />
                     ) : (
-                      <X className="h-5 w-5 text-gray-300 shrink-0" />
+                      <X className="h-5 w-5 text-gray-300 dark:text-muted-foreground/50 shrink-0" />
                     )}
                     <span
                       className={
                         feature.included
-                          ? "text-gray-700 font-medium"
-                          : "text-gray-400"
+                          ? "text-gray-700 dark:text-foreground font-medium"
+                          : "text-gray-400 dark:text-muted-foreground"
                       }
                     >
                       {feature.text}
@@ -103,24 +103,24 @@ export default function PricingSelection() {
           </Card>
 
           {/* Pro Plan */}
-          <Card className="border-primary ring-2 ring-primary/20 shadow-xl scale-105 relative overflow-hidden bg-white">
-            <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-xl">
+          <Card className="border-primary ring-2 ring-primary/20 shadow-xl scale-105 relative overflow-hidden bg-white dark:bg-card">
+            <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-xl">
               MOST POPULAR
             </div>
-            <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-green-500/50 to-green-400/50 blur-sm -z-10" />
+            <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-green-500/50 to-green-400/50 dark:from-primary/30 dark:to-primary/20 blur-sm -z-10" />
 
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-slate-900 font-heading">
+                <span className="text-2xl font-bold text-slate-900 dark:text-foreground font-heading">
                   Pro
                 </span>
               </CardTitle>
               <CardDescription>Full access to all features</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold text-slate-900 font-heading">
+                <span className="text-4xl font-bold text-slate-900 dark:text-foreground font-heading">
                   $19
                 </span>
-                <span className="text-gray-600 ml-2">/month</span>
+                <span className="text-gray-600 dark:text-muted-foreground ml-2">/month</span>
               </div>
             </CardHeader>
             <CardContent>
@@ -135,7 +135,7 @@ export default function PricingSelection() {
                 ].map((feature) => (
                   <li key={feature.text} className="flex items-center gap-3">
                     <Check className="h-5 w-5 text-primary shrink-0" />
-                    <span className="text-slate-900 font-medium">
+                    <span className="text-slate-900 dark:text-foreground font-medium">
                       {feature.text}
                     </span>
                   </li>
@@ -144,7 +144,7 @@ export default function PricingSelection() {
             </CardContent>
             <CardFooter>
               <Button
-                className="w-full py-6 text-lg bg-primary hover:bg-primary/90 text-white shadow-lg"
+                className="w-full py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
                 onClick={handleSelectPro}
               >
                 Start Pro
@@ -153,7 +153,7 @@ export default function PricingSelection() {
           </Card>
         </div>
 
-        <p className="text-center text-gray-500 mt-12 text-sm">
+        <p className="text-center text-gray-500 dark:text-muted-foreground mt-12 text-sm">
           Secure payment powered by Stripe. Cancel anytime.
         </p>
       </div>

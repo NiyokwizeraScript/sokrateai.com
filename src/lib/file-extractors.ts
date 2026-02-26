@@ -22,12 +22,24 @@ export function validateFile(file: File, maxSizeMB: number = 10): { valid: boole
         return { valid: false, error: `File is too large. Maximum size is ${maxSizeMB}MB.` };
     }
     const allowedTypes = [
-        "application/pdf", "image/jpeg", "image/png", "image/gif", "image/webp",
-        "text/plain", "text/markdown",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        "text/plain",
+        "text/markdown",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+        "application/msword", // .doc
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
+        "application/vnd.ms-powerpoint", // .ppt
     ];
-    if (!allowedTypes.includes(file.type) && !file.name.endsWith(".md")) {
-        return { valid: false, error: "Unsupported file type." };
+    const allowedExtensions = [".pdf", ".doc", ".docx", ".txt", ".md", ".ppt", ".pptx", ".jpg", ".jpeg", ".png", ".webp"];
+    const ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+    const typeOk = allowedTypes.includes(file.type) || file.type.startsWith("text/");
+    const extOk = allowedExtensions.some((e) => ext === e);
+    if (!typeOk && !extOk) {
+        return { valid: false, error: "Unsupported file type. Use PDF, Word, PowerPoint, text, or images." };
     }
     return { valid: true };
 }
