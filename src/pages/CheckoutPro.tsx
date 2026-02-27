@@ -33,7 +33,7 @@ const Logo = () => (
   </svg>
 );
 
-const ProductDisplay = () => (
+const ProductDisplay = ({ userId }: { userId?: string | null }) => (
   <div className="flex flex-col items-center">
     <div className="text-center mb-8">
       <h1 className="text-3xl font-heading font-bold mb-2">Sokrate AI Pro</h1>
@@ -49,6 +49,9 @@ const ProductDisplay = () => (
         name="lookup_key"
         value={import.meta.env.VITE_STRIPE_PRICE_ID || "price_1T5SYEPAFxjyGrVyf8WCivBR"}
       />
+      {userId && (
+        <input type="hidden" name="user_id" value={userId} />
+      )}
       <Button
         type="submit"
         size="lg"
@@ -73,17 +76,9 @@ const SuccessDisplay = ({ sessionId }: { sessionId: string }) => {
         </h3>
         <p className="text-gray-600 mt-2">Welcome to Sokrate AI Pro.</p>
       </div>
-      <form action="/create-portal-session" method="POST">
-        <input
-          type="hidden"
-          id="session-id"
-          name="session_id"
-          value={sessionId}
-        />
-        <Button id="checkout-and-portal-button" type="submit" variant="outline">
-          Manage your billing information
-        </Button>
-      </form>
+      <p className="text-sm text-muted-foreground">
+        To manage or cancel your subscription later, go to Account or contact support.
+      </p>
       <div className="mt-8">
         <Button asChild className="bg-primary text-white">
           <Link to="/dashboard">Go to Dashboard</Link>
@@ -137,7 +132,7 @@ export default function CheckoutPro() {
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-lg p-8 rounded-2xl border border-slate-100 shadow-2xl">
         {!success && message === "" ? (
-          <ProductDisplay />
+          <ProductDisplay userId={user?.uid} />
         ) : success && sessionId !== "" ? (
           <SuccessDisplay sessionId={sessionId} />
         ) : (

@@ -18,6 +18,54 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
+
+// Stripe webhook needs raw body for signature verification — register before json parser
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), (req, res) => {
+    if (!stripe || !stripeWebhookSecret) {
+        res.status(503).json({ error: 'Stripe or webhook not configured' });
+        return;
+    }
+    const sig = req.headers['stripe-signature'];
+    let event;
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, stripeWebhookSecret);
+    } catch (err) {
+        res.status(400).send(`Webhook signature verification failed: ${err.message}`);
+        return;
+    }
+    res.sendStatus(200); // respond quickly so Stripe doesn't retry
+    (async () => {
+        try {
+            if (event.type === 'checkout.session.completed') {
+                const session = event.data.object;
+                const uid = session.client_reference_id;
+                const customerId = session.customer;
+                if (uid && customerId && adminDb) {
+                    await adminDb.collection('users').doc(uid).set(
+                        { plan: 'pro', stripeCustomerId: customerId, updatedAt: new Date().toISOString() },
+                        { merge: true }
+                    );
+                }
+            } else if (event.type === 'customer.subscription.deleted' || event.type === 'customer.subscription.updated') {
+                const subscription = event.data.object;
+                const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
+                const status = subscription.status;
+                if (event.type === 'customer.subscription.deleted' || status === 'canceled' || status === 'unpaid' || status === 'past_due') {
+                    if (customerId && adminDb) {
+                        const snap = await adminDb.collection('users').where('stripeCustomerId', '==', customerId).limit(1).get();
+                        snap.docs.forEach(async (d) => {
+                            await d.ref.update({ plan: 'free', updatedAt: new Date().toISOString() });
+                        });
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('[Server] Stripe webhook handler error:', e);
+        }
+    })();
+});
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -40,6 +88,20 @@ const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
 const stripe = stripeKey && stripeKey.startsWith('sk_')
     ? new Stripe(stripeKey)
     : null;
+
+// Firebase Admin (for webhook to update user plan in Firestore)
+let adminDb = null;
+try {
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
+    if (serviceAccountJson) {
+        const { default: admin } = await import('firebase-admin');
+        const cred = JSON.parse(serviceAccountJson);
+        if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(cred) });
+        adminDb = admin.firestore();
+    }
+} catch (e) {
+    console.warn('[Server] Firebase Admin not configured:', e.message);
+}
 
 // Model ID - Haiku (Fallback)
 const MODEL_ID = "claude-3-haiku-20240307";
@@ -458,18 +520,12 @@ app.post('/api/create-checkout-session', async (req, res) => {
         return res.status(503).json({ error: 'Stripe is not configured. Add STRIPE_SECRET_KEY to .env' });
     }
     try {
-        const { lookup_key } = req.body;
-        // If coming from form, lookup_key is in body.
-
+        const { lookup_key, user_id } = req.body;
         const session = await stripe.checkout.sessions.create({
             billing_address_collection: 'auto',
-            line_items: [
-                {
-                    price: lookup_key,
-                    quantity: 1,
-                },
-            ],
+            line_items: [{ price: lookup_key, quantity: 1 }],
             mode: 'subscription',
+            client_reference_id: user_id || undefined,
             success_url: `${req.protocol}://${req.get('host')}/checkout-pro?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${req.protocol}://${req.get('host')}/checkout-pro?canceled=true`,
         });
@@ -477,8 +533,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
         res.redirect(303, session.url);
     } catch (error) {
         console.error("Stripe Error:", error);
-        // Expose error for debugging
-        res.status(500).json({ error: error.message, stack: error.stack });
+        res.status(500).json({ error: error.message });
     }
 });
 

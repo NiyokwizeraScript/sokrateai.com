@@ -27,6 +27,8 @@ export interface UserProfile {
   theme?: "light" | "dark" | "system";
   /** Cached from Stripe; default "free". Set to "pro" after successful checkout or via webhook. */
   plan?: Plan;
+  /** Set by webhook when user subscribes; used to set plan back to "free" when they cancel. */
+  stripeCustomerId?: string;
   createdAt?: string; // ISO
   updatedAt?: string; // ISO
 }
