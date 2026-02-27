@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,6 +43,19 @@ import { api } from "@/lib/api";
 import { validateFile, formatFileSize } from "@/lib/file-extractors";
 import { CreatingNotesLoading } from "@/components/notes/CreatingNotesLoading";
 import { cn } from "@/lib/utils";
+import { marked } from "marked";
+
+/** Converts AI markdown into HTML so the note editor shows proper paragraphs, headings, and lists. */
+function markdownToNoteHtml(md: string): string {
+  const t = (md ?? "").trim();
+  if (!t) return md ?? "";
+  try {
+    const out = marked(t, { async: false });
+    return typeof out === "string" ? out : t;
+  } catch {
+    return md ?? "";
+  }
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -63,6 +76,45 @@ export default function NotesDashboard() {
   const [docModalOpen, setDocModalOpen] = useState(false);
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docLoading, setDocLoading] = useState(false);
+  const [creatingProgress, setCreatingProgress] = useState(0);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    };
+  }, []);
+
+  const startProgressSimulation = () => {
+    setCreatingProgress(0);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    progressIntervalRef.current = setInterval(() => {
+      setCreatingProgress((p) => {
+        if (p >= 85) {
+          if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+            progressIntervalRef.current = null;
+          }
+          return 85;
+        }
+        return p + 4;
+      });
+    }, 400);
+  };
+
+  const finishProgressAndNavigate = (noteId: string) => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    setCreatingProgress(100);
+    setTimeout(() => {
+      setDocLoading(false);
+      setYoutubeLoading(false);
+      setCreatingProgress(0);
+      navigate(`/notes/${noteId}`);
+    }, 600);
+  };
 
   const { data: myNotes = [], isLoading: notesLoading } = useQuery({
     queryKey: ["userNotes", user?.uid],
@@ -99,7 +151,9 @@ export default function NotesDashboard() {
 
   const handleDocSubmit = async () => {
     if (!user?.uid || !docFile) return;
+    setDocModalOpen(false);
     setDocLoading(true);
+    startProgressSimulation();
     try {
       let fileContent = "";
       let image: { media_type: string; data: string } | null = null;
@@ -114,21 +168,53 @@ export default function NotesDashboard() {
       } else if (docFile.type === "text/plain" || docFile.type === "text/markdown" || /\.(txt|md)$/i.test(docFile.name)) {
         fileContent = await docFile.text();
       } else {
-        fileContent = `[File: ${docFile.name}]`;
+        // PDF, Word, PowerPoint etc. – send as base64 so the AI can read the document
+        fileContent = `[Document: ${docFile.name}]`;
+        const dataUrl = await new Promise<string>((res, rej) => {
+          const reader = new FileReader();
+          reader.onload = (e) => res((e.target?.result as string) ?? "");
+          reader.onerror = () => rej(new Error("Failed to read file"));
+          reader.readAsDataURL(docFile);
+        });
+        const documentBase64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : "";
+        const ext = docFile.name.toLowerCase().slice(docFile.name.lastIndexOf("."));
+        const documentMimeType =
+          docFile.type ||
+          (ext === ".pdf" ? "application/pdf" : ext === ".docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : ext === ".doc" ? "application/msword" : "application/octet-stream");
+        const res = await api.post<{ synthesis: string }>("/api/synthesize", {
+          fileContent,
+          documentBase64,
+          documentMimeType,
+        });
+        const content = markdownToNoteHtml(res.synthesis || "");
+        const title = docFile.name.replace(/\.[^.]+$/, "") || "Document";
+        const noteId = await createNote(user.uid, {
+          sourceType: "document",
+          title,
+          content,
+        });
+        setDocFile(null);
+        finishProgressAndNavigate(noteId);
+        return;
       }
       const res = await api.post<{ synthesis: string }>("/api/synthesize", { fileContent, image });
-      const content = res.synthesis || "";
+      const content = markdownToNoteHtml(res.synthesis || "");
       const title = docFile.name.replace(/\.[^.]+$/, "") || "Document";
       const noteId = await createNote(user.uid, {
         sourceType: "document",
         title,
         content,
       });
-      setDocModalOpen(false);
       setDocFile(null);
-      navigate(`/notes/${noteId}`);
+      finishProgressAndNavigate(noteId);
     } catch (err) {
       console.error(err);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      setCreatingProgress(0);
+      setDocLoading(false);
       const message = err instanceof Error ? err.message : "Could not process document.";
       toast({
         title: "Error",
@@ -137,29 +223,35 @@ export default function NotesDashboard() {
           : message,
         variant: "destructive",
       });
-    } finally {
-      setDocLoading(false);
     }
   };
 
   const handleYoutubeSubmit = async () => {
     if (!user?.uid || !youtubeUrl.trim()) return;
+    const urlToUse = youtubeUrl.trim();
+    setYoutubeOpen(false);
     setYoutubeLoading(true);
+    startProgressSimulation();
     try {
       const res = await api.post<{ title: string; content: string }>("/api/notes/process-url", {
-        url: youtubeUrl.trim(),
+        url: urlToUse,
       });
       const noteId = await createNote(user.uid, {
         sourceType: "youtube",
         title: res.title || "YouTube note",
-        content: res.content || "",
-        sourceUrl: youtubeUrl.trim(),
+        content: markdownToNoteHtml(res.content || ""),
+        sourceUrl: urlToUse,
       });
-      setYoutubeOpen(false);
       setYoutubeUrl("");
-      navigate(`/notes/${noteId}`);
+      finishProgressAndNavigate(noteId);
     } catch (err) {
       console.error(err);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      setCreatingProgress(0);
+      setYoutubeLoading(false);
       const message = err instanceof Error ? err.message : "Could not process link.";
       toast({
         title: "Error",
@@ -168,8 +260,6 @@ export default function NotesDashboard() {
           : message,
         variant: "destructive",
       });
-    } finally {
-      setYoutubeLoading(false);
     }
   };
 
@@ -209,7 +299,8 @@ export default function NotesDashboard() {
     <>
     {(docLoading || youtubeLoading) && (
       <CreatingNotesLoading
-        message={docLoading ? "Creating your notes from document..." : "Creating your notes from link..."}
+        message={docLoading ? "Processing document..." : "Processing link..."}
+        progress={creatingProgress}
       />
     )}
     <div className="p-6 lg:p-8 max-w-5xl mx-auto">

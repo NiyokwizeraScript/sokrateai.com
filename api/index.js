@@ -3,9 +3,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { YoutubeTranscript } from 'youtube-transcript';
 import Stripe from 'stripe';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mammoth from 'mammoth';
 
 dotenv.config();
 
@@ -29,7 +31,9 @@ const anthropic = anthropicApiKey ? new Anthropic({ apiKey: anthropicApiKey }) :
 // Initialize Gemini Client (optional) – use GEMINI_API_KEY (e.g. from Google AI Studio, often starts with AIza...)
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
-const GEMINI_MODEL = 'gemini-1.5-flash';
+// Use a current model (2.0-flash no longer available to new users). Override in .env with GEMINI_MODEL_NAME if needed.
+const GEMINI_MODEL = process.env.GEMINI_MODEL_NAME?.trim() || 'gemini-2.5-flash';
+const GEMINI_VISION_MODEL = process.env.GEMINI_VISION_MODEL_NAME?.trim() || GEMINI_MODEL;
 
 // Initialize Stripe Client (only when key is set - avoids crash in dev without Stripe)
 const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
@@ -60,7 +64,7 @@ Provide the solution in markdown format.`;
 
         let text = '';
         if (genAI) {
-            const model = genAI.getGenerativeModel({ model: image ? 'gemini-1.5-flash' : GEMINI_MODEL });
+            const model = genAI.getGenerativeModel({ model: image ? GEMINI_VISION_MODEL : GEMINI_MODEL });
             const parts = [{ text: prompt }];
             if (image && image.media_type && image.data) {
                 parts.push({ inlineData: { mimeType: image.media_type, data: image.data } });
@@ -115,7 +119,7 @@ ${fileContent ? fileContent.substring(0, 20000) : "No text provided. Use image o
 
         let rawText = '';
         if (genAI) {
-            const model = genAI.getGenerativeModel({ model: image ? 'gemini-1.5-flash' : GEMINI_MODEL });
+            const model = genAI.getGenerativeModel({ model: image ? GEMINI_VISION_MODEL : GEMINI_MODEL });
             const parts = [{ text: prompt }];
             if (image && image.media_type && image.data) {
                 parts.push({ inlineData: { mimeType: image.media_type, data: image.data } });
@@ -146,27 +150,72 @@ ${fileContent ? fileContent.substring(0, 20000) : "No text provided. Use image o
     }
 });
 
+// MIME types Gemini accepts as inline documents (e.g. PDF). DOCX/Word must be extracted to text first.
+const GEMINI_INLINE_DOCUMENT_TYPES = new Set(['application/pdf']);
+
 // Synthesize Endpoint (uses Gemini if GEMINI_API_KEY set, else Anthropic)
 app.post('/api/synthesize', async (req, res) => {
     try {
-        const { fileContent, image } = req.body;
-        console.log(`[Server] Synthesizing... Image provided: ${!!image}`);
+        let { fileContent, image, documentBase64, documentMimeType } = req.body;
+        const hasDocument = !!(documentBase64 && documentMimeType);
 
-        const prompt = `Analyze and synthesize the provided content (text or image).
-        Provide a structured summary in markdown that a student can use as notes.
-        
-        Text Content:
-        ${fileContent ? fileContent.substring(0, 20000) : "No text provided."}
-        `;
+        // DOCX/Word: Gemini doesn't support them inline — extract text and use as fileContent
+        if (hasDocument && !GEMINI_INLINE_DOCUMENT_TYPES.has(documentMimeType)) {
+            try {
+                const buffer = Buffer.from(documentBase64, 'base64');
+                const result = await mammoth.extractRawText({ buffer });
+                const extracted = (result && result.value) ? result.value.trim() : '';
+                fileContent = extracted ? `Document content:\n\n${extracted}` : (fileContent || 'No text extracted from document.');
+                documentBase64 = null;
+                documentMimeType = null;
+            } catch (extractErr) {
+                console.error('[Server] DOCX/text extraction failed:', extractErr);
+                fileContent = (fileContent || '') + '\n[Could not extract text from document.]';
+                documentBase64 = null;
+                documentMimeType = null;
+            }
+        }
+
+        const sendDocumentInline = !!(documentBase64 && documentMimeType);
+        console.log(`[Server] Synthesizing... Image provided: ${!!image}, Document inline: ${sendDocumentInline}`);
+
+        const prompt = `You are creating study notes from the user's content. Follow these rules strictly:
+
+1. CONTENT: Use only the actual content from the attached document, image, or text. Never infer from the filename or title. No "Based on the document title" or similar.
+
+2. VISUAL STYLE — write so it looks clean and easy to read, like a well-formatted document:
+   - No unnecessary symbols: no "---", no "###" or "##" as decoration, no asterisks or dashes used as separators inside paragraphs. The reader should see clear text, not markdown clutter.
+   - Headings: use only # for the main title, ## for main sections, ### for subsections. Put a blank line after every heading.
+   - Paragraphs: use short paragraphs (2–4 sentences). Leave a blank line between paragraphs.
+   - Lists: use simple bullets (one "- " per line). One bullet per line; never put several points in one line separated by * or •.
+   - Spacing: add a blank line between sections so the page breathes. No walls of text.
+   - Bold: use **only** for the occasional key term, not for whole lines.
+   Write so the result looks like a clean, structured document with clear line breaks and paragraphs—no symbol soup.
+
+3. Output only the notes. No intro line like "Here are your notes".
+
+Text content (if any):
+${fileContent ? fileContent.substring(0, 20000) : "No text provided."}
+${sendDocumentInline ? "\nAn attached document is also provided; your notes must be based solely on its actual content, not its filename or title." : ""}
+`;
 
         if (genAI) {
-            const model = genAI.getGenerativeModel({ model: image ? 'gemini-1.5-flash' : GEMINI_MODEL });
+            const hasVisual = !!(image || sendDocumentInline);
+            const model = genAI.getGenerativeModel({ model: hasVisual ? GEMINI_VISION_MODEL : GEMINI_MODEL });
             const parts = [{ text: prompt }];
             if (image && image.media_type && image.data) {
                 parts.push({
                     inlineData: {
                         mimeType: image.media_type,
                         data: image.data
+                    }
+                });
+            }
+            if (sendDocumentInline) {
+                parts.push({
+                    inlineData: {
+                        mimeType: documentMimeType,
+                        data: documentBase64
                     }
                 });
             }
@@ -283,7 +332,26 @@ ${content}`;
     }
 });
 
-// Notes: process URL (YouTube or website) – uses Gemini if GEMINI_API_KEY set, else Anthropic
+// Helpers: extract YouTube video ID; fetch webpage text
+function youtubeVideoId(url) {
+    const u = url.trim();
+    const be = u.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    if (be) return be[1];
+    const m = u.match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : null;
+}
+async function fetchPageText(pageUrl, maxChars = 80000) {
+    const res = await fetch(pageUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SokrateAI/1.0)' },
+        signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) throw new Error(`Page returned ${res.status}`);
+    const html = await res.text();
+    const stripped = html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return stripped.slice(0, maxChars);
+}
+
+// Notes: process URL – fetch real content (YouTube transcript or webpage), then AI writes notes
 app.post('/api/notes/process-url', async (req, res) => {
     try {
         const { url } = req.body;
@@ -291,28 +359,93 @@ app.post('/api/notes/process-url', async (req, res) => {
             return res.status(400).json({ error: 'url required' });
         }
         const isYoutube = /youtube\.com|youtu\.be/i.test(url);
-        const title = isYoutube ? 'YouTube note' : 'Web page note';
-        const prompt = isYoutube
-            ? `The user provided this YouTube or video link: ${url}. Generate a short structured note template they can fill: "Source: [link]. Add key points, summary, or paste transcript below." Return only the note content in markdown.`
-            : `The user provided this URL: ${url}. Generate a short note template: "Source: [link]. Summary or key points (add below)." Return only the note content in markdown.`;
+        let title = isYoutube ? 'YouTube note' : 'Web page note';
+        let sourceContent = '';
+        let prompt = '';
+
+        let noTranscript = false;
+        if (isYoutube) {
+            const videoId = youtubeVideoId(url);
+            if (!videoId) {
+                return res.status(400).json({ error: 'Invalid YouTube URL' });
+            }
+            try {
+                const chunks = await YoutubeTranscript.fetchTranscript(videoId);
+                sourceContent = chunks.map((c) => c.text).join(' ');
+                if (!sourceContent.trim()) noTranscript = true;
+            } catch (ytErr) {
+                console.error('[Server] YouTube transcript Error:', ytErr);
+                noTranscript = true;
+            }
+            if (noTranscript) {
+                prompt = `The user shared this YouTube video link but no transcript could be fetched (captions may be disabled or unavailable). AI cannot watch or access video content from a URL directly.
+
+Generate a short, helpful note template in markdown they can use while watching or after. Include:
+- Source: [paste the link: ${url}]
+- **Summary** (fill in after watching)
+- **Key points** (bullets)
+- **Quotes / definitions** (optional)
+- **My notes / transcript paste** (space for them to paste transcript or their own notes)
+
+Output only the markdown template, no apology or explanation.`;
+            } else {
+                prompt = `You are a study assistant. Below is the transcript from a YouTube video (Source: ${url}).
+
+Turn this transcript into clear, structured study notes in markdown. Include:
+- A short summary at the top
+- Main points and key ideas as headings/bullets
+- Important definitions or quotes if relevant
+- Keep it concise but useful for revision.
+
+Transcript:
+${sourceContent.slice(0, 120000)}
+`;
+            }
+        } else {
+            try {
+                sourceContent = await fetchPageText(url);
+                if (!sourceContent.trim()) {
+                    sourceContent = '(Could not extract text from this page.)';
+                }
+            } catch (fetchErr) {
+                console.error('[Server] Fetch page Error:', fetchErr);
+                return res.status(400).json({
+                    error: 'Could not fetch the webpage. Check the URL or try again later.',
+                });
+            }
+            prompt = `You are a study assistant. Below is text extracted from a webpage (Source: ${url}).
+
+Turn this into clear, structured study notes in markdown. Include:
+- A short summary at the top
+- Main points and key ideas as headings/bullets
+- Important facts or quotes
+- Keep it concise but useful for revision.
+
+Page content:
+${sourceContent.slice(0, 120000)}
+`;
+        }
+
+        if (!genAI && !anthropic) {
+            return res.status(503).json({ error: 'Add GEMINI_API_KEY or ANTHROPIC_API_KEY to your .env' });
+        }
 
         let text = '';
         if (genAI) {
             const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
             const result = await model.generateContent(prompt);
             text = result.response?.text?.() ?? '';
-        } else if (anthropic) {
+        } else {
             const msg = await anthropic.messages.create({
                 model: MODEL_ID,
-                max_tokens: 1024,
+                max_tokens: 4096,
                 messages: [{ role: 'user', content: prompt }],
             });
             text = msg.content[0].text;
-        } else {
-            return res.status(503).json({ error: 'Add GEMINI_API_KEY or ANTHROPIC_API_KEY to your .env' });
         }
 
-        res.json({ title, content: text || `# Note from link\n\nSource: ${url}\n\nAdd your content below.` });
+        const content = text.trim() || `# Note from link\n\nSource: ${url}\n\n(No content could be generated.)`;
+        res.json({ title, content });
     } catch (error) {
         console.error('[Server] process-url Error:', error);
         res.status(500).json({ error: error.message || 'Processing failed' });
