@@ -56,6 +56,21 @@ export default function NoteQuizView() {
       .finally(() => setQuizLoading(false));
   }, [note?.content, toast]);
 
+  const handleRetryQuiz = () => {
+    if (!note?.content) return;
+    setQuizLoading(true);
+    setQuestions(null);
+    setAnswers({});
+    setShowResults(false);
+    api
+      .post<{ questions: QuizQuestion[] }>("/api/notes/quiz", { noteContent: note.content })
+      .then((res) => setQuestions(res.questions ?? []))
+      .catch(() => {
+        toast({ title: "Error", description: "Could not generate quiz.", variant: "destructive" });
+      })
+      .finally(() => setQuizLoading(false));
+  };
+
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !note) return;
     const userMsg: ChatMessage = { role: "user", content: chatInput.trim() };
@@ -114,11 +129,6 @@ export default function NoteQuizView() {
               <p className="text-sm text-muted-foreground">No questions generated.</p>
             ) : (
               <div className="space-y-4">
-                {!showResults && (
-                  <Button onClick={() => setShowResults(true)} className="w-full">
-                    Submit & see results
-                  </Button>
-                )}
                 {showResults && (
                   <p className="text-sm font-medium text-foreground">
                     Score: {correctCount}/{total}
@@ -156,6 +166,15 @@ export default function NoteQuizView() {
                     </CardContent>
                   </Card>
                 ))}
+                {!showResults ? (
+                  <Button onClick={() => setShowResults(true)} className="w-full" size="lg">
+                    Submit & see results
+                  </Button>
+                ) : (
+                  <Button onClick={handleRetryQuiz} variant="outline" className="w-full" size="lg">
+                    Try another quiz
+                  </Button>
+                )}
               </div>
             )}
           </div>

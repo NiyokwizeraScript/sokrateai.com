@@ -62,6 +62,18 @@ Profile shape: `displayName`, `email`, `photoURL`, `theme`, `plan` (`"free"` | `
 
 AuthContext already syncs profile on login: creates a user doc with `plan: "free"` for new users; for existing users merges displayName, email, photoURL (never overwrites `plan`, so Pro stays Pro).
 
+## 8. Stripe checkout (production)
+
+For the real domain you must use **live** Stripe keys and a **live** Price ID. Test and live IDs are different; using a test price with live keys (or vice versa) causes "No such price".
+
+**Vercel env (production):**
+
+- **STRIPE_SECRET_KEY** – Live secret key (`sk_live_...`).
+- **VITE_STRIPE_PRICE_ID** – Live Price ID (`price_...`) for the subscription. Create a Product and Price in [Stripe Dashboard](https://dashboard.stripe.com/) (switch to **Live** mode), then copy the Price ID from the product’s pricing. (Optional: **STRIPE_PRICE_ID** on the server does the same; the app uses the client value from the form when the server one is not set.)
+- **STRIPE_WEBHOOK_SECRET** – From Stripe Dashboard → Developers → Webhooks (use the signing secret for your `checkout.session.completed` endpoint).
+
+Redeploy after adding or changing **VITE_STRIPE_PRICE_ID** so the frontend build picks it up.
+
 ---
 
 **Summary:** Enable Firestore in the Firebase project, set security rules, then use `getUserProfile` / `setUserProfile` and the same patterns for any new collections (history, quizzes, feedback, subscription cache).

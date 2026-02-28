@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { YoutubeTranscript } from 'youtube-transcript';
+import { fetchTranscript } from 'youtube-transcript-plus';
 import Stripe from 'stripe';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -402,6 +402,28 @@ function youtubeVideoId(url) {
     const m = u.match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/);
     return m ? m[1] : null;
 }
+
+// YouTube transcript with fallbacks: try default, then common languages (en, en-US, en-GB). Uses a real browser user-agent to reduce blocks.
+const YT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+async function fetchYoutubeTranscript(videoId) {
+    const configs = [
+        { userAgent: YT_USER_AGENT },
+        { userAgent: YT_USER_AGENT, lang: 'en' },
+        { userAgent: YT_USER_AGENT, lang: 'en-US' },
+        { userAgent: YT_USER_AGENT, lang: 'en-GB' },
+    ];
+    for (const config of configs) {
+        try {
+            const chunks = await fetchTranscript(videoId, config);
+            if (chunks?.length && chunks.some((c) => c.text?.trim())) {
+                return chunks.map((c) => c.text).join(' ');
+            }
+        } catch (err) {
+            console.error('[Server] YouTube transcript attempt:', config.lang || 'default', err.message);
+        }
+    }
+    return null;
+}
 async function fetchPageText(pageUrl, maxChars = 80000) {
     const res = await fetch(pageUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SokrateAI/1.0)' },
@@ -431,14 +453,8 @@ app.post('/api/notes/process-url', async (req, res) => {
             if (!videoId) {
                 return res.status(400).json({ error: 'Invalid YouTube URL' });
             }
-            try {
-                const chunks = await YoutubeTranscript.fetchTranscript(videoId);
-                sourceContent = chunks.map((c) => c.text).join(' ');
-                if (!sourceContent.trim()) noTranscript = true;
-            } catch (ytErr) {
-                console.error('[Server] YouTube transcript Error:', ytErr);
-                noTranscript = true;
-            }
+            sourceContent = await fetchYoutubeTranscript(videoId) ?? '';
+            if (!sourceContent.trim()) noTranscript = true;
             if (noTranscript) {
                 prompt = `The user shared this YouTube video link but no transcript could be fetched (captions may be disabled or unavailable). AI cannot watch or access video content from a URL directly.
 
@@ -515,15 +531,23 @@ ${sourceContent.slice(0, 120000)}
 });
 
 // Stripe Checkout Session Endpoint
+// Use STRIPE_PRICE_ID (from env) for the price — must be a price from the same Stripe account/mode as STRIPE_SECRET_KEY (e.g. live price for live keys).
 app.post('/api/create-checkout-session', async (req, res) => {
     if (!stripe) {
         return res.status(503).json({ error: 'Stripe is not configured. Add STRIPE_SECRET_KEY to .env' });
     }
+    // Price from server env STRIPE_PRICE_ID or from client (VITE_STRIPE_PRICE_ID sent as lookup_key at build time)
+    const priceId = (process.env.STRIPE_PRICE_ID || req.body?.lookup_key || '').trim();
+    if (!priceId || !priceId.startsWith('price_')) {
+        return res.status(503).json({
+            error: 'Stripe price not configured. In Vercel, set VITE_STRIPE_PRICE_ID (or STRIPE_PRICE_ID) to your live Stripe Price ID (Dashboard → Live mode → create Price → copy the price_... ID). Redeploy after adding the env var.',
+        });
+    }
     try {
-        const { lookup_key, user_id } = req.body;
+        const { user_id } = req.body || {};
         const session = await stripe.checkout.sessions.create({
             billing_address_collection: 'auto',
-            line_items: [{ price: lookup_key, quantity: 1 }],
+            line_items: [{ price: priceId, quantity: 1 }],
             mode: 'subscription',
             client_reference_id: user_id || undefined,
             success_url: `${req.protocol}://${req.get('host')}/checkout-pro?success=true&session_id={CHECKOUT_SESSION_ID}`,

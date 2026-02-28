@@ -44,10 +44,11 @@ const ProductDisplay = ({ userId }: { userId?: string | null }) => (
       method="POST"
       className="w-full max-w-sm"
     >
+      {/* Price is taken from server env STRIPE_PRICE_ID in production; lookup_key only used when STRIPE_PRICE_ID is not set (e.g. dev). */}
       <input
         type="hidden"
         name="lookup_key"
-        value={import.meta.env.VITE_STRIPE_PRICE_ID || "price_1T5SYEPAFxjyGrVyf8WCivBR"}
+        value={import.meta.env.VITE_STRIPE_PRICE_ID ?? ""}
       />
       {userId && (
         <input type="hidden" name="user_id" value={userId} />
