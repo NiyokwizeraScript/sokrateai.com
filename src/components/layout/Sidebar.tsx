@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -59,8 +60,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="min-h-svh flex flex-col">
-      <SidebarHeader className="p-4 flex items-center shrink-0 min-h-14">
-        {/* Burger trigger is rendered in a fixed left column by the sidebar UI so it doesn't move when open/collapsed */}
+      <SidebarHeader className="p-4 flex items-center shrink-0">
+        <SidebarTrigger className="-ml-1" />
       </SidebarHeader>
 
       <SidebarSeparator />

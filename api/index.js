@@ -557,7 +557,11 @@ app.post('/api/create-checkout-session', async (req, res) => {
         res.redirect(303, session.url);
     } catch (error) {
         console.error("Stripe Error:", error);
-        res.status(500).json({ error: error.message });
+        const isNoSuchPrice = error?.code === 'resource_missing' && error?.param === 'line_items[0][price]';
+        const message = isNoSuchPrice
+            ? `No such price: '${priceId}'. Use a Price ID from the same Stripe account and mode (Live/Test) as your STRIPE_SECRET_KEY. In Dashboard, turn Test mode OFF for Live, then Products → your product → copy Price ID. Ensure STRIPE_PRICE_ID has no extra quotes or spaces.`
+            : error.message;
+        res.status(500).json({ error: message });
     }
 });
 

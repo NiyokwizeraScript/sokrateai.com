@@ -193,7 +193,6 @@ const Sidebar = React.forwardRef<
             )
         }
 
-        // Fixed left column for trigger so the burger icon never moves; content panel expands/collapses to its right.
         return (
             <div
                 ref={ref}
@@ -202,34 +201,15 @@ const Sidebar = React.forwardRef<
                 data-collapsible={collapsible === "icon" && state === "collapsed" ? "icon" : undefined}
                 {...props}
             >
-                {collapsible === "icon" ? (
-                    <>
-                        <div className="hidden h-full w-[var(--sidebar-width-icon)] shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
-                            <div className="flex h-14 items-center px-1">
-                                <SidebarTrigger className="h-9 w-9" />
-                            </div>
-                        </div>
-                        <div
-                            className={cn(
-                                "relative hidden h-full flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out overflow-hidden md:flex",
-                                state === "collapsed" ? "w-0 min-w-0" : "w-[calc(var(--sidebar-width)-var(--sidebar-width-icon))]",
-                                className
-                            )}
-                        >
-                            {children}
-                        </div>
-                    </>
-                ) : (
-                    <div
-                        className={cn(
-                            "relative hidden h-full w-[var(--sidebar-width)] flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out md:flex overflow-hidden",
-                            state === "collapsed" && "w-[var(--sidebar-width-icon)]",
-                            className
-                        )}
-                    >
-                        {children}
-                    </div>
-                )}
+                <div
+                    className={cn(
+                        "relative hidden h-full w-[var(--sidebar-width)] flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out md:flex overflow-hidden",
+                        state === "collapsed" && "w-[var(--sidebar-width-icon)]",
+                        className
+                    )}
+                >
+                    {children}
+                </div>
             </div>
         )
     }
