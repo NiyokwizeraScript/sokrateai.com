@@ -5,48 +5,108 @@
 @layer base {
   :root {
     --font-inter: "Inter", system-ui, sans-serif;
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.6%;
+    --font-satoshi: "Satoshi", system-ui, sans-serif;
+    /* App (non-landing): headings use Inter; landing overrides below */
+    --font-heading: var(--font-inter);
+
+    /* Neutral sophisticated base */
+    --background: 0 0% 99%;
+    --foreground: 220 15% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.6%;
+    --card-foreground: 220 15% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.6%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 9.1%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --popover-foreground: 220 15% 10%;
+    --muted: 220 10% 96%;
+    --muted-foreground: 220 10% 42%;
+    --accent: 220 10% 94%;
+    --accent-foreground: 220 15% 12%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --primary: 0 0% 9.1%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 160 84% 39%;
+
+    /* Primary = green accent (intentional, not dominant) */
+    --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9.1%;
-    --ring: 0 0% 3.6%;
-    --radius: 0.5rem;
+    --secondary: 220 10% 96%;
+    --secondary-foreground: 220 15% 12%;
+
+    /* Surfaces & elevation */
+    --surface-1: 0 0% 100%;
+    --surface-2: 220 10% 98%;
+    --surface-3: 220 10% 95%;
+    --surface-elevated: 0 0% 100%;
+
+    /* Radius scale */
+    --radius: 0.625rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.25rem;
+
+    /* Shadow tokens (soft, layered) */
+    --shadow-xs: 0 1px 2px hsl(220 15% 10% / 0.04);
+    --shadow-sm: 0 2px 4px hsl(220 15% 10% / 0.04), 0 2px 8px hsl(220 15% 10% / 0.03);
+    --shadow-md: 0 4px 12px hsl(220 15% 10% / 0.06), 0 2px 6px hsl(220 15% 10% / 0.04);
+    --shadow-lg: 0 8px 24px hsl(220 15% 10% / 0.08), 0 4px 12px hsl(220 15% 10% / 0.04);
+    --shadow-glow: 0 0 24px -4px hsl(160 84% 39% / 0.25);
+
+    /* Sidebar (premium surface) */
+    --sidebar: 0 0% 99%;
+    --sidebar-foreground: 220 15% 10%;
+    --sidebar-accent: 220 10% 94%;
+    --sidebar-accent-foreground: 220 15% 12%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 160 84% 39%;
+
+    /* Animation */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 96%;
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 96%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 96%;
-    --muted: 0 0% 16%;
-    --muted-foreground: 0 0% 78%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
+    --background: 220 14% 14%;
+    --foreground: 220 10% 94%;
+    --card: 220 12% 18%;
+    --card-foreground: 220 10% 94%;
+    --popover: 220 12% 18%;
+    --popover-foreground: 220 10% 94%;
+    --muted: 220 10% 24%;
+    --muted-foreground: 220 10% 58%;
+    --accent: 220 10% 26%;
+    --accent-foreground: 220 10% 94%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 22%;
-    --input: 0 0% 22%;
-    --primary: 0 0% 96%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 16%;
-    --secondary-foreground: 0 0% 90%;
-    --ring: 0 0% 72%;
+    --border: 220 10% 28%;
+    --input: 220 10% 28%;
+    --ring: 160 70% 45%;
+
+    --primary: 160 70% 45%;
+    --primary-foreground: 220 14% 10%;
+    --secondary: 220 10% 24%;
+    --secondary-foreground: 220 10% 94%;
+
+    --surface-1: 220 12% 18%;
+    --surface-2: 220 10% 21%;
+    --surface-3: 220 10% 24%;
+    --surface-elevated: 220 12% 20%;
+
+    --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.15);
+    --shadow-sm: 0 2px 8px hsl(0 0% 0% / 0.18);
+    --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.22);
+    --shadow-lg: 0 12px 32px hsl(0 0% 0% / 0.25);
+    --shadow-glow: 0 0 32px -4px hsl(160 70% 45% / 0.2);
+
+    --sidebar: 220 12% 18%;
+    --sidebar-foreground: 220 10% 94%;
+    --sidebar-accent: 220 10% 24%;
+    --sidebar-accent-foreground: 220 10% 94%;
+    --sidebar-border: 220 10% 26%;
+    --sidebar-ring: 160 70% 45%;
   }
 }
 
@@ -54,20 +114,42 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-/* Landing: gradient text and button glow */
-.text-gradient {
-  @apply bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 bg-clip-text text-transparent;
+/* Landing page: Satoshi for headings, Inter for body, premium spacing */
+.landing-page {
+  --font-heading: var(--font-satoshi);
+  font-family: var(--font-inter);
+  font-feature-settings: "rlig" 1, "calt" 1;
+  line-height: 1.6;
 }
-.glow-primary {
-  box-shadow: 0 0 20px -5px theme("colors.green.500 / 30%");
+.landing-page .font-heading {
+  font-family: var(--font-satoshi), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+.landing-page .font-heading.font-bold,
+.landing-page .font-heading.font-extrabold {
+  letter-spacing: 0.015em;
+}
+/* Prominent CTAs use Satoshi for hierarchy */
+.landing-page .cta-premium {
+  font-family: var(--font-satoshi), system-ui, sans-serif;
 }
 
-/* Premium CTA: subtle shimmer */
+/* Premium utilities */
+.text-gradient {
+  @apply bg-gradient-to-r from-primary via-emerald-500 to-primary bg-clip-text text-transparent;
+}
+.glow-primary {
+  box-shadow: var(--shadow-glow);
+}
 .cta-premium {
   position: relative;
   overflow: hidden;
@@ -79,24 +161,39 @@
   background: linear-gradient(
     105deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.15) 40%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.15) 60%,
+    rgba(255, 255, 255, 0.12) 40%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.12) 60%,
     transparent 100%
   );
   background-size: 200% 100%;
   animation: cta-shine 8s ease-in-out infinite;
   pointer-events: none;
 }
+.dark .cta-premium::before {
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.06) 60%,
+    transparent 100%
+  );
+}
 @keyframes cta-shine {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-
 @keyframes loading-bar {
   0%, 100% { width: 20%; opacity: 0.8; }
   50% { width: 80%; opacity: 1; }
 }
 .animate-loading-bar {
   animation: loading-bar 1.5s ease-in-out infinite;
+}
+
+/* Scroll / reveal animations: start invisible, run once */
+.animate-fade-in,
+.animate-fade-up {
+  animation-fill-mode: both;
 }

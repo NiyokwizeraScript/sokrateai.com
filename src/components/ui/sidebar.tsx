@@ -203,7 +203,7 @@ const Sidebar = React.forwardRef<
             >
                 <div
                     className={cn(
-                        "relative hidden h-full w-[var(--sidebar-width)] flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out md:flex overflow-hidden",
+                        "relative hidden h-full w-[var(--sidebar-width)] flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-out-expo md:flex overflow-hidden border-r border-sidebar-border shadow-soft-sm rounded-r-xl",
                         state === "collapsed" && "w-[var(--sidebar-width-icon)]",
                         className
                     )}

@@ -82,7 +82,7 @@ export function AppSidebar() {
                       className={cn(
                         "transition-all duration-200",
                         isActive &&
-                          "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
+                          "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary border-l-2 border-primary",
                       )}
                     >
                       <Link to={item.href} className="flex items-center gap-2 overflow-hidden">

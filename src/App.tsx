@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { ThemeProviderWithLanding } from "@/components/ThemeProviderWithLanding";
 import { Analytics } from "@vercel/analytics/react";
 
 // Pages
@@ -22,7 +23,6 @@ import Feedback from "@/pages/Feedback";
 // import History from "@/pages/History";
 import NotFound from "@/pages/NotFound";
 import CheckoutPro from "@/pages/CheckoutPro";
-import FAQ from "@/pages/FAQ";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
 import CookiePolicy from "@/pages/CookiePolicy";
@@ -42,13 +42,13 @@ function App() {
         <BrowserRouter
           future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
         >
+          <ThemeProviderWithLanding>
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/faq" element={<FAQ />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />
@@ -77,6 +77,7 @@ function App() {
           </Routes>
           <Toaster />
           <Analytics />
+          </ThemeProviderWithLanding>
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>

@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ScanLine, FileText, Trophy, History, ArrowRight, Sparkles, Trash2, Loader2 } from "lucide-react";
+import { FileUp, Link as LinkIcon, FileText, Trophy, History, ArrowRight, Sparkles, Trash2, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getRecentActivity, deleteHistoryItem, type HistoryItem, type HistoryItemType } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -10,30 +10,37 @@ import { cn } from "@/lib/utils";
 
 const tools = [
     {
-        title: "The Solver",
-        description: "Upload a problem and get a step-by-step AI solution",
-        icon: ScanLine,
-        href: "/solver",
-        gradient: "from-blue-500 to-cyan-500",
+        title: "Document upload",
+        description: "Upload PDF, DOC, PPT, or images and get AI notes",
+        icon: FileUp,
+        href: "/dashboard",
+        gradient: "from-emerald-500 to-teal-500",
     },
     {
-        title: "The Synthesizer",
-        description: "Upload documents and get AI-powered explanations",
+        title: "YouTube & links",
+        description: "Paste a URL and get notes from videos or webpages",
+        icon: LinkIcon,
+        href: "/dashboard",
+        gradient: "from-rose-500 to-pink-500",
+    },
+    {
+        title: "AI notes",
+        description: "Create and organize notes with AI assistance",
         icon: FileText,
-        href: "/synthesizer",
-        gradient: "from-purple-500 to-pink-500",
+        href: "/dashboard",
+        gradient: "from-violet-500 to-purple-500",
     },
     {
-        title: "The Quizzes",
-        description: "Generate quizzes from your documents",
+        title: "Quizzes",
+        description: "Generate quizzes from your notes",
         icon: Trophy,
-        href: "/quizzes",
+        href: "/dashboard",
         gradient: "from-amber-500 to-orange-500",
     },
 ];
 
-const typeIcons: Record<HistoryItemType, typeof ScanLine> = {
-  solver: ScanLine,
+const typeIcons: Record<HistoryItemType, typeof FileUp> = {
+  solver: FileUp,
   synthesizer: FileText,
   quiz: Trophy,
 };
@@ -89,20 +96,20 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 {tools.map((tool) => (
                     <Link key={tool.title} to={tool.href}>
-                        <Card className="h-full hover:shadow-lg transition-all duration-300 hover:border-primary/50 cursor-pointer group">
-                            <CardHeader>
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center mb-3`}>
-                                    <tool.icon className="h-6 w-6 text-white" />
+                        <Card className="h-full rounded-2xl border-border/80 bg-card/95 hover:border-primary/30 hover:shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.12)] transition-all duration-300 cursor-pointer group">
+                            <CardHeader className="pb-2">
+                                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center mb-3 shadow-lg shadow-black/10`}>
+                                    <tool.icon className="h-5 w-5 text-white" strokeWidth={2.25} />
                                 </div>
-                                <CardTitle className="text-lg font-heading flex items-center gap-2">
+                                <CardTitle className="text-base font-heading flex items-center gap-2">
                                     {tool.title}
-                                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="pt-0">
                                 <p className="text-sm text-muted-foreground">{tool.description}</p>
                             </CardContent>
                         </Card>
@@ -134,7 +141,7 @@ export default function Dashboard() {
                                 Start solving problems, synthesizing documents, or taking quizzes!
                             </p>
                             <Button asChild>
-                                <Link to="/solver">
+                                <Link to="/dashboard">
                                     Get Started
                                     <ArrowRight className="h-4 w-4 ml-2" />
                                 </Link>

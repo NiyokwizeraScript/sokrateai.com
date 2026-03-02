@@ -64,6 +64,43 @@ function formatDate(iso: string) {
   });
 }
 
+function DashboardActionCard({
+  icon: Icon,
+  title,
+  subtitle,
+  gradient,
+  onClick,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  subtitle: string;
+  gradient: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "group relative w-full text-left rounded-2xl p-6 border transition-all duration-300",
+        "bg-card/90 dark:bg-card/95 backdrop-blur-sm",
+        "border-border/80 hover:border-primary/30",
+        "shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.04),0_1px_2px_hsl(var(--foreground)/0.04),0_4px_12px_-2px_hsl(var(--foreground)/0.06)]",
+        "dark:shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.06),0_1px_2px_hsl(0_0%_0%/0.2),0_8px_24px_-4px_hsl(0_0%_0%/0.25)]",
+        "hover:shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.12),0_12px_32px_-8px_hsl(var(--foreground)/0.06)]",
+        "dark:hover:shadow-[0_4px_24px_-4px_hsl(var(--primary)/0.15),0_16px_40px_-8px_hsl(0_0%_0%/0.3)]",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+      )}
+    >
+      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-lg shadow-black/10 mb-3", gradient)}>
+        <Icon className="h-5 w-5 text-white" strokeWidth={2.25} />
+      </div>
+      <h3 className="font-heading font-semibold text-foreground">{title}</h3>
+      <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+    </button>
+  );
+}
+
 export default function NotesDashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -78,6 +115,7 @@ export default function NotesDashboard() {
   const [docLoading, setDocLoading] = useState(false);
   const [creatingProgress, setCreatingProgress] = useState(0);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const notesSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {
@@ -306,49 +344,34 @@ export default function NotesDashboard() {
     <div className="p-6 lg:p-8 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-heading font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Create new notes from a blank page, a document, or a link.</p>
+        <p className="text-muted-foreground mt-1">Create notes from a document, a link, or scratch—then take quizzes.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Card
-          className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
-          onClick={handleBlank}
-        >
-          <CardContent className="pt-6 flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
-              <FileText className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="font-semibold text-foreground">Blank document</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Start from scratch</p>
-          </CardContent>
-        </Card>
-        <Card
-          className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
+        <DashboardActionCard
+          icon={FileUp}
+          title="Document upload"
+          subtitle="PDF, DOC, PPT, images"
+          gradient="from-emerald-500 to-teal-500"
           onClick={() => setDocModalOpen(true)}
-        >
-          <CardContent className="pt-6 flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
-              <FileUp className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="font-semibold text-foreground">Document upload</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">PDF, DOC, PPT, images, etc.</p>
-          </CardContent>
-        </Card>
-        <Card
-          className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
+        />
+        <DashboardActionCard
+          icon={LinkIcon}
+          title="YouTube & links"
+          subtitle="URL → AI notes"
+          gradient="from-rose-500 to-pink-500"
           onClick={() => setYoutubeOpen(true)}
-        >
-          <CardContent className="pt-6 flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
-              <LinkIcon className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="font-semibold text-foreground">Website link</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">YouTube or webpage URL</p>
-          </CardContent>
-        </Card>
+        />
+        <DashboardActionCard
+          icon={FileText}
+          title="AI notes"
+          subtitle="Start from scratch"
+          gradient="from-violet-500 to-purple-500"
+          onClick={handleBlank}
+        />
       </div>
 
-      <div className="relative mb-4">
+      <div ref={notesSectionRef} className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search"
