@@ -63,7 +63,7 @@ export function HeroSection() {
               "hover:bg-emerald-400 transition-colors duration-200 active:bg-emerald-600"
             )}
           >
-            <Link to="/login" className="inline-flex items-center gap-2 font-bold">
+            <Link to="/signup" className="inline-flex items-center gap-2 font-bold">
               Get Started – It's Free
               <ArrowRight className="w-4 h-4" />
             </Link>

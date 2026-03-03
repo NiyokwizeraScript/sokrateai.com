@@ -55,7 +55,7 @@ export function LandingNav() {
 
           <div className="hidden md:flex items-center gap-4">
             <Link
-              to="/login"
+              to="/signup"
               className={cn(
                 "inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-medium",
                 "bg-transparent border border-emerald-500/60 text-white",
@@ -94,7 +94,7 @@ export function LandingNav() {
               ))}
               <div className="pt-3 mt-2 border-t border-white/10">
                 <Button asChild className="w-full h-11 min-h-[44px] bg-primary text-primary-foreground">
-                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
                     Get Started
                   </Link>
                 </Button>

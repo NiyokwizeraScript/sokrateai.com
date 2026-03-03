@@ -1,7 +1,12 @@
+import { useEffect } from "react";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { Footer } from "@/components/landing/Footer";
 
 export default function CookiePolicy() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
         <div className="landing-page min-h-screen bg-[#0B0F14]">
             <LandingNav />

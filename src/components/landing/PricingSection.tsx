@@ -142,7 +142,7 @@ function PricingCard({ plan }: { plan: (typeof plans)[0] }) {
           variant={plan.highlighted ? "default" : "outline"}
           asChild
         >
-          <Link to="/login">{plan.cta}</Link>
+          <Link to="/signup">{plan.cta}</Link>
         </Button>
       </div>
     </div>

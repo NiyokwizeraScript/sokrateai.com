@@ -14,7 +14,7 @@ export function Footer() {
             </Link>
             <p className="text-sm text-white/70 mb-6">Turn anything into notes, flashcards, and quizzes.</p>
             <Button asChild className="rounded-xl bg-emerald-500 text-white border-0 hover:bg-emerald-400 font-medium">
-              <Link to="/login">Get Started – It's Free</Link>
+              <Link to="/signup">Get Started – It's Free</Link>
             </Button>
           </div>
 
@@ -40,7 +40,7 @@ export function Footer() {
             <h4 className="font-heading font-semibold text-sm mb-3 text-white">Company</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/login" className="text-sm text-white/70 hover:text-white transition-colors py-0.5 block">
+                <Link to="/signup" className="text-sm text-white/70 hover:text-white transition-colors py-0.5 block">
                   Sign Up
                 </Link>
               </li>

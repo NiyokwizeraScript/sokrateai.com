@@ -75,7 +75,7 @@ export function LandingAIProgressDemo() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Button size="lg" asChild className="glow-primary">
-                <Link to="/login" className="inline-flex items-center gap-2">
+                <Link to="/signup" className="inline-flex items-center gap-2">
                   Get full solution
                   <ArrowRight className="w-4 h-4" />
                 </Link>

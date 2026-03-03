@@ -31,7 +31,7 @@ export function CTASection() {
                 asChild
                 className="cta-premium glow-primary h-12 sm:h-[52px] min-h-[48px] px-7 sm:px-9 text-base font-medium transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
-                <Link to="/login" className="inline-flex items-center justify-center">
+                <Link to="/signup" className="inline-flex items-center justify-center">
                   Get Started Free
                   <ArrowRight className="w-4 h-4 ml-2 shrink-0" />
                 </Link>

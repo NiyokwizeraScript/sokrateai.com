@@ -6,15 +6,16 @@ import { SokrateLogo } from "@/components/auth/SokrateLogo";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-
-export default function Login() {
-  const { signInWithGoogle, signInWithEmail } = useAuth();
-  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
-  const [isLoadingEmail, setIsLoadingEmail] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function Signup() {
+  const { signInWithGoogle, signUpWithEmail } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
+  const [isLoadingEmail, setIsLoadingEmail] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleGoogleSignIn = async () => {
     setIsLoadingGoogle(true);
@@ -25,9 +26,7 @@ export default function Login() {
       toast({
         title: "Authentication Error",
         description:
-          error instanceof Error
-            ? error.message
-            : "Failed to sign in with Google",
+          error instanceof Error ? error.message : "Failed to sign in with Google",
         variant: "destructive",
       });
     } finally {
@@ -45,15 +44,28 @@ export default function Login() {
       });
       return;
     }
+    if (password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsLoadingEmail(true);
     try {
-      await signInWithEmail(email.trim(), password);
+      await signUpWithEmail({
+        email: email.trim(),
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
       navigate("/dashboard");
     } catch (error: unknown) {
       const message =
-        error instanceof Error ? error.message : "Failed to sign in";
+        error instanceof Error ? error.message : "Failed to create account";
       toast({
-        title: "Sign in failed",
+        title: "Sign up failed",
         description: message,
         variant: "destructive",
       });
@@ -78,10 +90,10 @@ export default function Login() {
 
           <div className="rounded-2xl border border-white/10 bg-[#161b22]/90 shadow-xl shadow-black/20 p-8 sm:p-10">
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
-              Sign In
+              Sign Up
             </h1>
             <p className="text-white/80 text-sm mb-6">
-              Sign in to continue your learning journey
+              Create notes in minutes. No credit card required.
             </p>
 
             <Button
@@ -125,6 +137,22 @@ export default function Login() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  type="text"
+                  placeholder="First name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="h-11 rounded-xl border-white/20 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-emerald-500/50"
+                />
+                <Input
+                  type="text"
+                  placeholder="Last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="h-11 rounded-xl border-white/20 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-emerald-500/50"
+                />
+              </div>
               <Input
                 type="email"
                 placeholder="Email"
@@ -139,6 +167,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
                 className="h-11 rounded-xl border-white/20 bg-white/5 text-white placeholder:text-white/40 focus-visible:ring-emerald-500/50"
               />
               <Button
@@ -149,18 +178,30 @@ export default function Login() {
                 {isLoadingEmail ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
-                  "Sign in"
+                  "Create an account"
                 )}
               </Button>
             </form>
 
             <p className="text-center text-sm text-white/70 mt-6">
-              Don&apos;t have an account?{" "}
-              <Link to="/signup" className="font-semibold text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
-                Sign up
+              Already have an account?{" "}
+              <Link to="/login" className="font-semibold text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
+                Sign in
               </Link>
             </p>
           </div>
+
+          <p className="text-center text-xs text-white/50 mt-6 max-w-sm mx-auto">
+            By creating or entering an account, you agree to the{" "}
+            <Link to="/terms" className="text-emerald-400 hover:text-emerald-300 underline underline-offset-1">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy" className="text-emerald-400 hover:text-emerald-300 underline underline-offset-1">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
       </div>
     </div>

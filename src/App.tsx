@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/react";
 // Pages
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
 import VerifyOtp from "@/pages/VerifyOtp";
 import Onboarding from "@/pages/Onboarding";
 import NotesDashboard from "@/pages/NotesDashboard";
@@ -48,6 +49,7 @@ function App() {
             {/* Public routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
