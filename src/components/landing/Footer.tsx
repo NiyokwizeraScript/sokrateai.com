@@ -4,7 +4,6 @@ import { SokrateLogo } from "@/components/auth/SokrateLogo";
 const footerLinks = {
   product: [
     { label: "Features", href: "#features" },
-    { label: "Pricing", href: "#pricing" },
     { label: "How It Works", href: "#how-it-works" },
     { label: "FAQ", href: "#faq" },
   ],

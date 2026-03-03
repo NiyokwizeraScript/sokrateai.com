@@ -125,6 +125,15 @@ const config = {
                     "0%, 100%": { opacity: "0.5" },
                     "50%": { opacity: "0.85" },
                 },
+                "aurora-drift-slow": {
+                    "0%, 100%": { transform: "translate(0, 0) rotate(0deg)" },
+                    "33%": { transform: "translate(3%, -2%) rotate(0.8deg)" },
+                    "66%": { transform: "translate(-2%, 2%) rotate(-0.5deg)" },
+                },
+                "aurora-opacity-slow": {
+                    "0%, 100%": { opacity: "0.4" },
+                    "50%": { opacity: "0.7" },
+                },
                 "doc-upload": {
                     "0%": { transform: "translateY(8px)", opacity: "0.4" },
                     "50%": { transform: "translateY(-2px)", opacity: "1" },
@@ -154,6 +163,8 @@ const config = {
                 shimmer: "shimmer 1.5s ease-in-out infinite",
                 "aurora-drift": "aurora-drift 25s ease-in-out infinite",
                 "aurora-opacity": "aurora-opacity 12s ease-in-out infinite",
+                "aurora-drift-slow": "aurora-drift-slow 25s ease-in-out infinite",
+                "aurora-opacity-slow": "aurora-opacity-slow 22s ease-in-out infinite",
                 "doc-upload": "doc-upload 2.2s ease-in-out infinite",
                 "link-pulse": "link-pulse 2s ease-in-out infinite",
                 "notes-sparkle": "notes-sparkle 2.5s ease-in-out infinite",

@@ -1,79 +1,78 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play } from "lucide-react";
-import { LandingAIProgressDemo } from "@/components/landing/LandingAIProgressDemo";
+import { ArrowRight } from "lucide-react";
+import { HeroAurora } from "@/components/landing/HeroAurora";
+import { AnimatedAICard } from "@/components/landing/AnimatedAICard";
+import { SocratesMascot } from "@/components/landing/SocratesMascot";
+import { cn } from "@/lib/utils";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[88dvh] sm:min-h-screen flex items-center justify-center pt-28 pb-16 sm:pt-32 sm:pb-24 px-4 sm:px-6 overflow-hidden">
-      {/* Local soft blurs (aurora is global) */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/3 left-1/4 w-72 h-72 sm:w-[28rem] sm:h-[28rem] bg-primary/[0.06] rounded-full blur-[80px]" />
-        <div className="absolute bottom-1/3 right-1/3 w-56 h-56 sm:w-80 sm:h-80 bg-primary/[0.05] rounded-full blur-[70px]" />
-        <div
-          className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-      </div>
+    <section
+      className={cn(
+        "relative min-h-[100vh] w-full overflow-hidden",
+        "flex flex-col lg:flex-row lg:items-center lg:gap-12 xl:gap-16",
+        "pt-28 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 lg:px-8",
+        "bg-transparent"
+      )}
+    >
+      <HeroAurora />
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1
-            className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[3.5rem] font-bold tracking-tight text-foreground mb-6 sm:mb-8 leading-[1.12] animate-fade-up"
-            style={{ animationDelay: "0.1s" }}
+      <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12 lg:gap-8 xl:gap-10">
+        {/* Left column */}
+        <div className="flex-1 max-w-[600px] lg:max-w-none min-w-0">
+          <span
+            className={cn(
+              "inline-block px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold mb-4",
+              "border border-emerald-500/60 text-emerald-400",
+              "shadow-[0_0_12px_hsl(160_50%_50%/0.25)]"
+            )}
           >
-            Solve Anything.
-            <br />
-            Understand Everything.
-            <br />
-            <span className="text-gradient">With Sokrate AI</span>
+            Beta
+          </span>
+          <h1
+            className="font-heading text-[3.5rem] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[5.5rem] 2xl:text-[6rem] font-bold tracking-tight leading-[1.05] mb-6 whitespace-nowrap"
+            style={{ letterSpacing: "-0.03em" }}
+          >
+            <span className="text-white">Meet</span>{" "}
+            <span className="text-white">Sokrate</span>{" "}
+            <span className="relative inline-block text-white">
+              A
+              <span
+                className="relative inline-block drop-shadow-[0_4px_10px_rgba(0,0,0,0.45)]"
+                style={{ textShadow: "0 3px 8px rgba(0,0,0,0.5)" }}
+              >
+                I
+                <SocratesMascot className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-[0.1em] origin-bottom" />
+              </span>
+            </span>
           </h1>
 
           <p
-            className="max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-muted-foreground mb-10 sm:mb-12 px-1 leading-relaxed animate-fade-up"
-            style={{ animationDelay: "0.2s" }}
+            className="text-xl sm:text-2xl md:text-[1.5rem] lg:text-[1.75rem] text-white/80 font-normal max-w-[600px] mt-8 leading-snug"
           >
-            Any problem. Any subject. Upload a problem—get step-by-step solutions, clear explanations, and quizzes to learn.
+            Turn anything into notes, flashcards, quizzes and more.
           </p>
 
-          <div
-            className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 animate-fade-up"
-            style={{ animationDelay: "0.3s" }}
+          <Button
+            asChild
+            size="lg"
+            className={cn(
+              "mt-10 h-14 sm:h-[60px] px-8 sm:px-10 text-base font-bold rounded-xl",
+              "bg-emerald-500 text-white border-0",
+              "hover:bg-emerald-400 transition-colors duration-200 active:bg-emerald-600"
+            )}
           >
-            <Button
-              size="lg"
-              asChild
-              className="cta-premium glow-primary h-12 sm:h-[52px] min-h-[48px] px-7 sm:px-9 text-base font-medium transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <Link to="/login" className="inline-flex items-center justify-center">
-                Get Started Free
-                <ArrowRight className="w-4 h-4 ml-2 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
-              className="h-12 sm:h-[52px] min-h-[48px] px-7 sm:px-9 border-border/80 hover:border-primary/30 hover:text-primary transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <a href="#how-it-works" className="inline-flex items-center justify-center">
-                <Play className="w-4 h-4 mr-2 shrink-0 text-primary" />
-                See How It Works
-              </a>
-            </Button>
-          </div>
+            <Link to="/login" className="inline-flex items-center gap-2 font-bold">
+              Get Started – It's Free
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </Button>
+        </div>
 
-          {/* Try it: submit problem → simulated AI progress → CTA */}
-          <div
-            className="mt-14 sm:mt-20 md:mt-24 px-0 sm:px-4 animate-fade-up"
-            style={{ animationDelay: "0.45s" }}
-          >
-            <LandingAIProgressDemo />
-          </div>
+        {/* Right column: AI card */}
+        <div className="flex-1 flex justify-center lg:justify-end min-h-[380px] lg:min-h-0 items-center">
+          <AnimatedAICard />
         </div>
       </div>
     </section>

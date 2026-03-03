@@ -7,28 +7,24 @@ const subjects = [
     icon: "Σ",
     examples: ["Differential Equations", "Linear Algebra", "Real Analysis", "Number Theory", "Topology"],
     gradient: "from-blue-600 to-blue-400",
-    bgGlow: "bg-blue-500/20",
   },
   {
     name: "Physics",
     icon: "⚛",
     examples: ["Quantum Mechanics", "Electromagnetism", "Thermodynamics", "Relativity", "Classical Mechanics"],
     gradient: "from-purple-600 to-purple-400",
-    bgGlow: "bg-purple-500/20",
   },
   {
     name: "Chemistry",
     icon: "⚗",
     examples: ["Organic Reactions", "Thermochemistry", "Quantum Chemistry", "Biochemistry", "Spectroscopy"],
     gradient: "from-orange-600 to-orange-400",
-    bgGlow: "bg-orange-500/20",
   },
   {
     name: "Biology",
     icon: "🧬",
     examples: ["Molecular Biology", "Genetics", "Cell Biology", "Evolution", "Neuroscience"],
     gradient: "from-emerald-600 to-emerald-400",
-    bgGlow: "bg-emerald-500/20",
   },
 ];
 
@@ -72,17 +68,10 @@ export function SubjectsSection() {
 
 function SubjectCard({ subject }: { subject: (typeof subjects)[0] }) {
   return (
-    <div className="group relative h-full">
-      <div
-        className={cn(
-          "absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 blur-xl",
-          subject.bgGlow
-        )}
-      />
-      <div className="relative h-full bg-card rounded-2xl overflow-hidden border border-border shadow-soft-sm transition-all duration-300 group-hover:border-primary/25 group-hover:shadow-soft-md">
+    <div className="relative h-full">
+      <div className="relative h-full bg-card rounded-2xl overflow-hidden border border-border shadow-soft-sm">
         <div className={cn("h-20 sm:h-24 flex items-center justify-center bg-gradient-to-br relative", subject.gradient)}>
           <span className="text-4xl sm:text-5xl" aria-hidden>{subject.icon}</span>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
         </div>
         <div className="p-5 sm:p-6">
           <h3 className="font-heading text-lg sm:text-xl font-bold mb-4 text-foreground tracking-tight">
