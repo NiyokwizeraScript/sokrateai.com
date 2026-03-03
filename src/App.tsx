@@ -28,6 +28,7 @@ import TermsOfService from "@/pages/TermsOfService";
 import CookiePolicy from "@/pages/CookiePolicy";
 import PricingSelection from "@/pages/PricingSelection";
 import Account from "@/pages/Account";
+import ForStudents from "@/pages/ForStudents";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ function App() {
             <Route path="/cookies" element={<CookiePolicy />} />
             <Route path="/checkout-pro" element={<CheckoutPro />} />
             <Route path="/pricing-selection" element={<PricingSelection />} />
+            <Route path="/for-students" element={<ForStudents />} />
 
             {/* Dashboard routes (with sidebar layout) */}
             <Route

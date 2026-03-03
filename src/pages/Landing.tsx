@@ -1,9 +1,7 @@
 import { HeroSection } from "@/components/landing/HeroSection";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { SubjectsSection } from "@/components/landing/SubjectsSection";
+import { ProductShowcaseSection } from "@/components/landing/ProductShowcaseSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { StatsSection } from "@/components/landing/StatsSection";
-import { CTASection } from "@/components/landing/CTASection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { Footer } from "@/components/landing/Footer";
 import { LandingNav } from "@/components/landing/LandingNav";
@@ -24,12 +22,10 @@ export default function Landing() {
       <div className="relative z-10">
         <LandingNav />
         <HeroSection />
-      <FeaturesSection />
-      <SubjectsSection />
-      <HowItWorksSection />
-      <StatsSection />
+        <ProductShowcaseSection />
+        <HowItWorksSection />
+        <StatsSection />
       <FAQSection />
-      <CTASection />
       <Footer />
       </div>
     </div>

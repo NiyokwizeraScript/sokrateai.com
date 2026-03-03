@@ -123,10 +123,10 @@
   }
 }
 
-/* Landing page: Satoshi for headings, Inter for body, premium spacing */
+/* Landing page: same font as hero (Satoshi) for all text */
 .landing-page {
   --font-heading: var(--font-satoshi);
-  font-family: var(--font-inter);
+  font-family: var(--font-satoshi), system-ui, sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
   line-height: 1.6;
 }
@@ -138,7 +138,6 @@
 .landing-page .font-heading.font-extrabold {
   letter-spacing: 0.015em;
 }
-/* Prominent CTAs use Satoshi for hierarchy */
 .landing-page .cta-premium {
   font-family: var(--font-satoshi), system-ui, sans-serif;
 }

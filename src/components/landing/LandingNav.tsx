@@ -16,8 +16,6 @@ export function LandingNav() {
   }, []);
 
   const navLinks = [
-    { href: "#features", label: "Features" },
-    { href: "#subjects", label: "Subjects" },
     { href: "#how-it-works", label: "How It Works" },
     { href: "#faq", label: "FAQ" },
   ];
