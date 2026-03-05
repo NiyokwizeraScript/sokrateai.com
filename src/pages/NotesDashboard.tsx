@@ -18,6 +18,7 @@ import {
   Loader2,
   Search,
   Trash2,
+  ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -82,21 +83,38 @@ function DashboardActionCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative w-full text-left rounded-2xl p-6 border transition-all duration-300",
-        "bg-card/90 dark:bg-card/95 backdrop-blur-sm",
-        "border-border/80 hover:border-primary/30",
-        "shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.04),0_1px_2px_hsl(var(--foreground)/0.04),0_4px_12px_-2px_hsl(var(--foreground)/0.06)]",
-        "dark:shadow-[inset_0_1px_0_0_hsl(var(--foreground)/0.06),0_1px_2px_hsl(0_0%_0%/0.2),0_8px_24px_-4px_hsl(0_0%_0%/0.25)]",
-        "hover:shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.12),0_12px_32px_-8px_hsl(var(--foreground)/0.06)]",
-        "dark:hover:shadow-[0_4px_24px_-4px_hsl(var(--primary)/0.15),0_16px_40px_-8px_hsl(0_0%_0%/0.3)]",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+        "group relative w-full text-left rounded-2xl border transition-all duration-200",
+        "bg-[#141820] hover:bg-[#191d27]",
+        "border-white/8 hover:border-emerald-500/40",
+        "shadow-[0_10px_30px_rgba(0,0,0,0.55)]",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
       )}
     >
-      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-lg shadow-black/10 mb-3", gradient)}>
-        <Icon className="h-5 w-5 text-white" strokeWidth={2.25} />
+      <div className="flex items-center justify-between gap-4 px-4 sm:px-5 py-3.5 sm:py-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div
+            className={cn(
+              "w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-lg shadow-black/30 shrink-0",
+              gradient
+            )}
+          >
+            <Icon className="h-5 w-5 text-white" strokeWidth={2.25} />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-heading font-semibold text-sm sm:text-base text-white">
+              {title}
+            </h3>
+            <p className="text-xs sm:text-sm text-white/70 mt-0.5 truncate">
+              {subtitle}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-full bg-white/5 border border-white/15 flex items-center justify-center text-white/80 group-hover:bg-emerald-500 group-hover:border-emerald-400 group-hover:text-white transition-colors">
+            <ArrowRight className="h-4 w-4" />
+          </div>
+        </div>
       </div>
-      <h3 className="font-heading font-semibold text-foreground">{title}</h3>
-      <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
     </button>
   );
 }
@@ -335,19 +353,21 @@ export default function NotesDashboard() {
 
   return (
     <>
-    {(docLoading || youtubeLoading) && (
-      <CreatingNotesLoading
-        message={docLoading ? "Processing document..." : "Processing link..."}
-        progress={creatingProgress}
-      />
-    )}
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-heading font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Create notes from a document, a link, or scratch—then take quizzes.</p>
-      </div>
+      {(docLoading || youtubeLoading) && (
+        <CreatingNotesLoading
+          message={docLoading ? "Processing document..." : "Processing link..."}
+          progress={creatingProgress}
+        />
+      )}
+      <div className="px-4 lg:px-2 xl:px-4 py-4 lg:py-6 max-w-6xl mx-auto md:ml-4">
+        <div className="mb-5">
+          <h1 className="text-3xl font-heading font-bold text-white">Dashboard</h1>
+          <p className="text-sm text-white/70 mt-1 font-semibold">
+            Create new notes
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-7">
         <DashboardActionCard
           icon={FileUp}
           title="Document upload"

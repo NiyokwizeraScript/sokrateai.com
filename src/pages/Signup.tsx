@@ -21,7 +21,7 @@ export default function Signup() {
     setIsLoadingGoogle(true);
     try {
       await signInWithGoogle();
-      navigate("/dashboard");
+      navigate("/onboarding");
     } catch (error: unknown) {
       toast({
         title: "Authentication Error",
@@ -60,15 +60,24 @@ export default function Signup() {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
       });
-      navigate("/dashboard");
+      navigate("/onboarding");
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to create account";
-      toast({
-        title: "Sign up failed",
-        description: message,
-        variant: "destructive",
-      });
+      const code = (error as { code?: string } | null)?.code;
+      if (code === "auth/email-already-in-use") {
+        toast({
+          title: "You already have an account",
+          description: "That email is already registered. Please sign in instead.",
+          variant: "destructive",
+        });
+      } else {
+        const message =
+          error instanceof Error ? error.message : "Failed to create account";
+        toast({
+          title: "Sign up failed",
+          description: message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoadingEmail(false);
     }

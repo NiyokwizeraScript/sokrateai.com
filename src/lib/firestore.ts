@@ -29,6 +29,8 @@ export interface UserProfile {
   plan?: Plan;
   /** Set by webhook when user subscribes; used to set plan back to "free" when they cancel. */
   stripeCustomerId?: string;
+  /** True after user completes or skips onboarding; used so we only show onboarding once. */
+  onboardingCompleted?: boolean;
   createdAt?: string; // ISO
   updatedAt?: string; // ISO
 }

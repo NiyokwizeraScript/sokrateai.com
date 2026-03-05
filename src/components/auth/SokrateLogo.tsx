@@ -53,9 +53,6 @@ export function SokrateLogo({
           >
             Sokrate AI
           </span>
-          <span className="text-xs font-medium text-gray-600">
-            AI Learning Assistant
-          </span>
         </div>
       ) : null}
     </div>

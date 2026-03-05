@@ -46,22 +46,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userRef = doc(db, "users", currentUser.uid);
           const snap = await getDoc(userRef);
           const now = new Date().toISOString();
+
+          const baseData: Record<string, unknown> = {
+            plan: "free",
+            onboardingCompleted: false,
+            createdAt: now,
+            updatedAt: now,
+          };
+
+          const profileFields: Record<string, unknown> = {};
+          if (currentUser.displayName != null) {
+            profileFields.displayName = currentUser.displayName;
+          }
+          if (currentUser.email != null) {
+            profileFields.email = currentUser.email;
+          }
+          if (currentUser.photoURL != null) {
+            profileFields.photoURL = currentUser.photoURL;
+          }
+
           if (!snap.exists()) {
-            await setDoc(userRef, {
-              displayName: currentUser.displayName ?? undefined,
-              email: currentUser.email ?? undefined,
-              photoURL: currentUser.photoURL ?? undefined,
-              plan: "free",
-              createdAt: now,
-              updatedAt: now,
-            });
+            await setDoc(userRef, { ...profileFields, ...baseData });
           } else {
             await setDoc(
               userRef,
               {
-                displayName: currentUser.displayName ?? undefined,
-                email: currentUser.email ?? undefined,
-                photoURL: currentUser.photoURL ?? undefined,
+                ...profileFields,
                 updatedAt: now,
               },
               { merge: true }

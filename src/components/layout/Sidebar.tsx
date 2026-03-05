@@ -28,11 +28,15 @@ import {
   UserCircle,
   MessageSquare,
   Sparkles,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/components/ui/sidebar";
+import { SokrateLogo } from "@/components/auth/SokrateLogo";
 
 const baseNavItems: { title: string; icon: typeof LayoutDashboard; href: string }[] = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -44,6 +48,8 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { isPro } = useUserProfile();
   const navItems = [...baseNavItems, ...(isPro ? [feedbackNavItem] : [])];
+  const { state, toggleSidebar } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   const userInitials = user?.displayName
     ? user.displayName
@@ -59,9 +65,38 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon" className="min-h-svh flex flex-col">
-      <SidebarHeader className="p-4 flex items-center shrink-0">
-        <SidebarTrigger className="-ml-1" />
+    <Sidebar
+      variant="sidebar"
+      collapsible="icon"
+      className="fixed inset-y-0 left-0 z-40 flex flex-col bg-[#050810] text-white border-r border-white/10"
+    >
+      <SidebarHeader className="px-2.5 py-2 flex flex-row items-center justify-between gap-2 shrink-0">
+        <Link
+          to="/dashboard"
+          className={cn(
+            "flex items-center gap-2 overflow-hidden flex-1 min-w-0",
+            // Hide brand row entirely when sidebar is collapsed
+            "group-data-[state=collapsed]/sidebar-wrapper:hidden"
+          )}
+        >
+          <SokrateLogo
+            showText={false}
+            className="scale-[0.7] origin-left"
+            iconClassName="drop-shadow-lg"
+          />
+        </Link>
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-colors group-data-[state=collapsed]/sidebar-wrapper:mx-auto group-data-[state=collapsed]/sidebar-wrapper:self-center"
+        >
+          {isCollapsed ? (
+            <ChevronsRight className="h-4 w-4" />
+          ) : (
+            <ChevronsLeft className="h-4 w-4" />
+          )}
+        </button>
       </SidebarHeader>
 
       <SidebarSeparator />
@@ -100,8 +135,12 @@ export function AppSidebar() {
               })}
             </SidebarMenu>
             {!isPro && (
-              <div className="px-2 pt-6 group-data-[collapsible=icon]/sidebar-wrapper:px-0 group-data-[collapsible=icon]/sidebar-wrapper:flex group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
-                <Button asChild className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground group-data-[collapsible=icon]/sidebar-wrapper:!w-8 group-data-[collapsible=icon]/sidebar-wrapper:!min-w-8 group-data-[collapsible=icon]/sidebar-wrapper:!p-0 group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
+              <div className="px-2 pt-4 group-data-[collapsible=icon]/sidebar-wrapper:px-0 group-data-[collapsible=icon]/sidebar-wrapper:flex group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
+                <Button
+                  asChild
+                  size="sm"
+                  className="w-full h-8 text-xs font-semibold rounded-md gap-2 bg-emerald-500 hover:bg-emerald-400 text-white group-data-[collapsible=icon]/sidebar-wrapper:!w-8 group-data-[collapsible=icon]/sidebar-wrapper:!min-w-8 group-data-[collapsible=icon]/sidebar-wrapper:!p-0 group-data-[collapsible=icon]/sidebar-wrapper:justify-center"
+                >
                   <Link to="/pricing-selection" className="flex items-center gap-2 overflow-hidden">
                     <Sparkles className="h-4 w-4 shrink-0" />
                     <span className="truncate group-data-[collapsible=icon]/sidebar-wrapper:hidden">Upgrade to Pro</span>
