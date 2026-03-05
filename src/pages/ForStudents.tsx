@@ -43,13 +43,13 @@ export default function ForStudents() {
             <div
               className={cn(
                 "rounded-2xl border p-8 sm:p-10 md:p-12 mb-14",
-                "bg-white/[0.06] border-emerald-500/20",
-                "shadow-[0_0_0_1px_hsl(160_50%_40%/0.08),0_8px_32px_-8px_rgba(0,0,0,0.3)]",
-                "hover:border-emerald-500/30 transition-colors duration-300"
+                "bg-white/[0.06] border-emerald-500/25",
+                "shadow-[0_0_0_1px_rgba(16,185,129,0.12),0_0_32px_-8px_rgba(16,185,129,0.18),0_8px_32px_-8px_rgba(0,0,0,0.35)]",
+                "hover:border-emerald-500/35 hover:shadow-[0_0_0_1px_rgba(16,185,129,0.18),0_0_40px_-8px_rgba(16,185,129,0.22),0_12px_40px_-8px_rgba(0,0,0,0.4)] transition-all duration-300"
               )}
             >
               <div className="flex items-start gap-4 mb-6">
-                <div className="w-14 h-14 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <div className="w-14 h-14 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-[0_0_20px_-4px_rgba(16,185,129,0.25)]">
                   <FileText className="w-7 h-7 text-emerald-400" />
                 </div>
                 <div>
@@ -77,15 +77,16 @@ export default function ForStudents() {
           <div className="grid sm:grid-cols-2 gap-6 mb-20">
             <div
               className={cn(
-                "rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-8",
-                "transition-colors duration-200 hover:border-emerald-500/20 hover:bg-white/[0.06]"
+                "rounded-2xl border border-white/10 bg-white/[0.05] p-6 sm:p-8",
+                "shadow-[0_0_0_1px_rgba(16,185,129,0.06),0_8px_24px_-8px_rgba(0,0,0,0.25)]",
+                "transition-all duration-200 hover:border-emerald-500/25 hover:bg-white/[0.07] hover:shadow-[0_0_0_1px_rgba(16,185,129,0.12),0_0_24px_-8px_rgba(16,185,129,0.12),0_12px_28px_-8px_rgba(0,0,0,0.3)]"
               )}
             >
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center mb-5">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/25 flex items-center justify-center mb-5 shadow-[0_0_16px_-4px_rgba(16,185,129,0.2)]">
                 <BookOpen className="w-6 h-6 text-emerald-400" />
               </div>
               <h3 className="font-heading text-xl font-bold text-white mb-3">Flashcards</h3>
-              <p className="text-white/70 leading-relaxed mb-5">
+              <p className="text-white/75 leading-relaxed mb-5">
                 Auto-generate flashcards from your notes. Review and memorize key concepts anywhere.
               </p>
               <Link to="/signup" className="text-sm font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1">
@@ -94,15 +95,16 @@ export default function ForStudents() {
             </div>
             <div
               className={cn(
-                "rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-8",
-                "transition-colors duration-200 hover:border-emerald-500/20 hover:bg-white/[0.06]"
+                "rounded-2xl border border-white/10 bg-white/[0.05] p-6 sm:p-8",
+                "shadow-[0_0_0_1px_rgba(16,185,129,0.06),0_8px_24px_-8px_rgba(0,0,0,0.25)]",
+                "transition-all duration-200 hover:border-emerald-500/25 hover:bg-white/[0.07] hover:shadow-[0_0_0_1px_rgba(16,185,129,0.12),0_0_24px_-8px_rgba(16,185,129,0.12),0_12px_28px_-8px_rgba(0,0,0,0.3)]"
               )}
             >
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center mb-5">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/25 flex items-center justify-center mb-5 shadow-[0_0_16px_-4px_rgba(16,185,129,0.2)]">
                 <Trophy className="w-6 h-6 text-emerald-400" />
               </div>
               <h3 className="font-heading text-xl font-bold text-white mb-3">Quizzes</h3>
-              <p className="text-white/70 leading-relaxed mb-5">
+              <p className="text-white/75 leading-relaxed mb-5">
                 Generate quizzes from any note. Test yourself and see where to improve.
               </p>
               <Link to="/signup" className="text-sm font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1">
@@ -112,7 +114,10 @@ export default function ForStudents() {
           </div>
 
           <div className="text-center">
-            <Link to="/" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 hover:border-white/20 transition-colors"
+            >
               ← Back to home
             </Link>
           </div>

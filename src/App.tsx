@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ThemeProviderWithLanding } from "@/components/ThemeProviderWithLanding";
 import { Analytics } from "@vercel/analytics/react";
+import { UpgradeDialogProvider } from "@/components/billing/UpgradeDialog";
 
 // Pages
 import Landing from "@/pages/Landing";
@@ -27,7 +28,6 @@ import CheckoutPro from "@/pages/CheckoutPro";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
 import CookiePolicy from "@/pages/CookiePolicy";
-import PricingSelection from "@/pages/PricingSelection";
 import Account from "@/pages/Account";
 import ForStudents from "@/pages/ForStudents";
 
@@ -45,6 +45,7 @@ function App() {
           future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
         >
           <ThemeProviderWithLanding>
+          <UpgradeDialogProvider>
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Landing />} />
@@ -56,7 +57,6 @@ function App() {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />
             <Route path="/checkout-pro" element={<CheckoutPro />} />
-            <Route path="/pricing-selection" element={<PricingSelection />} />
             <Route path="/for-students" element={<ForStudents />} />
 
             {/* Dashboard routes (with sidebar layout) */}
@@ -79,6 +79,7 @@ function App() {
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </UpgradeDialogProvider>
           <Toaster />
           <Analytics />
           </ThemeProviderWithLanding>

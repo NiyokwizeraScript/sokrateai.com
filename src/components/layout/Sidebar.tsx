@@ -37,6 +37,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/ui/sidebar";
 import { SokrateLogo } from "@/components/auth/SokrateLogo";
+import { useUpgradeDialog } from "@/components/billing/UpgradeDialog";
 
 const baseNavItems: { title: string; icon: typeof LayoutDashboard; href: string }[] = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -50,6 +51,7 @@ export function AppSidebar() {
   const navItems = [...baseNavItems, ...(isPro ? [feedbackNavItem] : [])];
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const { open: openUpgrade } = useUpgradeDialog();
 
   const userInitials = user?.displayName
     ? user.displayName
@@ -137,14 +139,14 @@ export function AppSidebar() {
             {!isPro && (
               <div className="px-2 pt-4 group-data-[collapsible=icon]/sidebar-wrapper:px-0 group-data-[collapsible=icon]/sidebar-wrapper:flex group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
                 <Button
-                  asChild
                   size="sm"
                   className="w-full h-8 text-xs font-semibold rounded-md gap-2 bg-emerald-500 hover:bg-emerald-400 text-white group-data-[collapsible=icon]/sidebar-wrapper:!w-8 group-data-[collapsible=icon]/sidebar-wrapper:!min-w-8 group-data-[collapsible=icon]/sidebar-wrapper:!p-0 group-data-[collapsible=icon]/sidebar-wrapper:justify-center"
+                  onClick={openUpgrade}
                 >
-                  <Link to="/pricing-selection" className="flex items-center gap-2 overflow-hidden">
-                    <Sparkles className="h-4 w-4 shrink-0" />
-                    <span className="truncate group-data-[collapsible=icon]/sidebar-wrapper:hidden">Upgrade to Pro</span>
-                  </Link>
+                  <Sparkles className="h-4 w-4 shrink-0" />
+                  <span className="truncate group-data-[collapsible=icon]/sidebar-wrapper:hidden">
+                    Upgrade to Pro
+                  </span>
                 </Button>
               </div>
             )}

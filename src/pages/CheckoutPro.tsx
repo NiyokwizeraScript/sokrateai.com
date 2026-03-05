@@ -94,7 +94,7 @@ const Message = ({ message }: { message: string }) => (
     <p className="text-yellow-600 bg-yellow-50 p-4 rounded-lg">{message}</p>
     <div className="mt-4">
       <Button asChild variant="ghost">
-        <Link to="/pricing-selection">Return to Plans</Link>
+        <Link to="/dashboard">Back to dashboard</Link>
       </Button>
     </div>
   </section>
