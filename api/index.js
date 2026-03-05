@@ -314,21 +314,40 @@ ${sendDocumentInline ? "\nAn attached document is also provided; your notes must
     }
 });
 
-// Notes: chat with note context (Gemini or Anthropic)
+// Notes: chat with note context (Gemini or Anthropic). Supports optional attachments: text, image, PDF/DOC.
 app.post('/api/notes/chat', async (req, res) => {
     if (!genAI && !anthropic) {
         return res.status(503).json({ error: 'Add GEMINI_API_KEY or ANTHROPIC_API_KEY to .env' });
     }
     try {
-        const { noteContent, messages } = req.body;
+        let { noteContent, messages, attachedFileContent, image, documentBase64, documentMimeType } = req.body;
         if (!Array.isArray(messages) || messages.length === 0) {
             return res.status(400).json({ error: 'messages required' });
         }
+        attachedFileContent = attachedFileContent || '';
+        if (documentBase64 && documentMimeType && !GEMINI_INLINE_DOCUMENT_TYPES.has(documentMimeType)) {
+            try {
+                const buffer = Buffer.from(documentBase64, 'base64');
+                const result = await mammoth.extractRawText({ buffer });
+                const extracted = (result && result.value) ? result.value.trim() : '';
+                attachedFileContent = (attachedFileContent ? attachedFileContent + '\n\n' : '') + (extracted || '[Could not extract text from document.]');
+                documentBase64 = null;
+                documentMimeType = null;
+            } catch (extractErr) {
+                console.error('[Server] notes/chat DOCX extraction failed:', extractErr);
+                attachedFileContent = (attachedFileContent || '') + '\n[Could not extract text from document.]';
+                documentBase64 = null;
+                documentMimeType = null;
+            }
+        }
+        const hasInlineDoc = !!(documentBase64 && documentMimeType);
         const context = (noteContent || '').slice(0, 12000);
+        const attachmentBlock = attachedFileContent ? `\nAttached document/content (use this to answer if relevant):\n${attachedFileContent.slice(0, 15000)}\n` : '';
         const prompt = `You are a helpful tutor. Use the following notes as context to answer the user's questions. Be concise and accurate.
 
 Notes:
 ${context}
+${attachmentBlock}
 
 User messages and your replies (last message is the new question):
 ${messages.map((m) => `${m.role}: ${m.content}`).join('\n')}
@@ -337,14 +356,26 @@ Reply as the assistant (only the new reply, no prefix).`;
 
         let reply = '';
         if (genAI) {
-            const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
-            const result = await model.generateContent(prompt);
+            const hasVisual = !!(image?.media_type && image?.data) || hasInlineDoc;
+            const model = genAI.getGenerativeModel({ model: hasVisual ? GEMINI_VISION_MODEL : GEMINI_MODEL });
+            const parts = [{ text: prompt }];
+            if (image?.media_type && image?.data) {
+                parts.push({ inlineData: { mimeType: image.media_type, data: image.data } });
+            }
+            if (hasInlineDoc) {
+                parts.push({ inlineData: { mimeType: documentMimeType, data: documentBase64 } });
+            }
+            const result = await model.generateContent(parts);
             reply = result.response?.text?.() ?? '';
         } else {
+            const content = [{ type: 'text', text: prompt }];
+            if (image?.media_type && image?.data) {
+                content.push({ type: 'image', source: { type: 'base64', media_type: image.media_type, data: image.data } });
+            }
             const msg = await anthropic.messages.create({
                 model: MODEL_ID,
                 max_tokens: 2048,
-                messages: [{ role: 'user', content: prompt }],
+                messages: [{ role: 'user', content }],
             });
             const textBlock = Array.isArray(msg.content) ? msg.content.find((b) => b.type === 'text') : null;
             reply = textBlock?.text ?? (msg.content?.[0]?.text ?? '');

@@ -24,12 +24,14 @@ import {
   X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUpgradeDialog } from "@/components/billing/UpgradeDialog";
 
 export default function Account() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile, isPro, isLoading: profileLoading } = useUserProfile();
+  const { open: openUpgrade } = useUpgradeDialog();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState(user?.displayName ?? "");
@@ -257,11 +259,9 @@ export default function Account() {
                     </p>
                   </div>
                   {!isPro && (
-                    <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                      <Link to="/pricing-selection" className="gap-2">
-                        <Sparkles className="h-4 w-4" />
-                        Upgrade
-                      </Link>
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" onClick={() => openUpgrade()}>
+                      <Sparkles className="h-4 w-4" />
+                      Upgrade
                     </Button>
                   )}
                 </div>

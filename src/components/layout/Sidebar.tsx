@@ -103,32 +103,23 @@ export function AppSidebar() {
 
       <SidebarSeparator />
 
-      <SidebarContent className="px-2 flex-1 min-h-0">
+      <SidebarContent className="px-0 flex-1 min-h-0">
         <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
+          <SidebarGroupContent className="flex flex-col gap-3">
+            <SidebarMenu className="flex flex-col gap-3">
               {navItems.map((item) => {
                 const isActive =
                   location.pathname === item.href ||
                   location.pathname.startsWith(item.href + "/");
                 return (
-                  <SidebarMenuItem key={item.href} className="flex items-center group-data-[collapsible=icon]/sidebar-wrapper:justify-center min-h-8">
+                  <SidebarMenuItem key={item.href} className="w-full group-data-[collapsible=icon]/sidebar-wrapper:flex group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
-                      className={cn(
-                        "transition-all duration-200",
-                        isActive &&
-                          "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary border-l-2 border-primary",
-                      )}
+                      className="w-full rounded-lg px-3 py-2.5 h-auto min-h-10 justify-start transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     >
-                      <Link to={item.href} className="flex items-center gap-2 overflow-hidden">
-                        <item.icon
-                          className={cn(
-                            "h-4 w-4 shrink-0 transition-colors",
-                            isActive && "text-primary",
-                          )}
-                        />
+                      <Link to={item.href} className="flex items-center gap-2.5 overflow-hidden w-full">
+                        <item.icon className="h-4 w-4 shrink-0 transition-colors" />
                         <span className="font-medium truncate group-data-[collapsible=icon]/sidebar-wrapper:hidden">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -137,10 +128,10 @@ export function AppSidebar() {
               })}
             </SidebarMenu>
             {!isPro && (
-              <div className="px-2 pt-4 group-data-[collapsible=icon]/sidebar-wrapper:px-0 group-data-[collapsible=icon]/sidebar-wrapper:flex group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
+              <div className="w-full pt-0 group-data-[collapsible=icon]/sidebar-wrapper:flex group-data-[collapsible=icon]/sidebar-wrapper:justify-center">
                 <Button
                   size="sm"
-                  className="w-full h-8 text-xs font-semibold rounded-md gap-2 bg-emerald-500 hover:bg-emerald-400 text-white group-data-[collapsible=icon]/sidebar-wrapper:!w-8 group-data-[collapsible=icon]/sidebar-wrapper:!min-w-8 group-data-[collapsible=icon]/sidebar-wrapper:!p-0 group-data-[collapsible=icon]/sidebar-wrapper:justify-center"
+                  className="w-full min-h-10 h-auto rounded-lg px-3 py-2.5 text-sm font-semibold gap-2.5 bg-primary hover:bg-primary/90 text-primary-foreground group-data-[collapsible=icon]/sidebar-wrapper:!w-8 group-data-[collapsible=icon]/sidebar-wrapper:!min-w-8 group-data-[collapsible=icon]/sidebar-wrapper:!h-8 group-data-[collapsible=icon]/sidebar-wrapper:!p-0 group-data-[collapsible=icon]/sidebar-wrapper:justify-center"
                   onClick={openUpgrade}
                 >
                   <Sparkles className="h-4 w-4 shrink-0" />

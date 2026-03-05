@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Resizable, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Share2, Trophy, Send, Loader2, Trash2, ArrowLeft } from "lucide-react";
+import { Share2, Trophy, Send, Loader2, Trash2, ArrowLeft, Paperclip, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getNote, updateNote, shareNoteToEmail, deleteNote } from "@/lib/firestore";
 import {
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
+import { validateFile, formatFileSize } from "@/lib/file-extractors";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -49,6 +50,8 @@ export default function NoteView() {
   const [shareSending, setShareSending] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const chatFileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: note, isLoading } = useQuery({
     queryKey: ["note", user?.uid, noteId],
@@ -79,18 +82,77 @@ export default function NoteView() {
     });
   };
 
+  const handleChatFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const validation = validateFile(file);
+    if (!validation.valid) {
+      toast({ title: "Invalid file", description: validation.error, variant: "destructive" });
+      return;
+    }
+    setAttachedFile(file);
+    e.target.value = "";
+  };
+
   const handleSendMessage = async () => {
-    if (!chatInput.trim() || !note) return;
-    const userMsg: ChatMessage = { role: "user", content: chatInput.trim() };
+    if ((!chatInput.trim() && !attachedFile) || !note) return;
+    const questionText = chatInput.trim() || (attachedFile ? `[Attached: ${attachedFile.name}]` : "");
+    const userMsg: ChatMessage = { role: "user", content: questionText };
     setMessages((m) => [...m, userMsg]);
     setChatInput("");
+    const fileToSend = attachedFile;
+    setAttachedFile(null);
     setChatLoading(true);
     try {
       const plainContent = note.content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-      const res = await api.post<{ reply: string }>("/api/notes/chat", {
+      const payload: {
+        noteContent: string;
+        messages: { role: string; content: string }[];
+        attachedFileContent?: string;
+        image?: { media_type: string; data: string };
+        documentBase64?: string;
+        documentMimeType?: string;
+      } = {
         noteContent: plainContent.slice(0, 15000),
         messages: [...messages, userMsg].map((m) => ({ role: m.role, content: m.content })),
-      });
+      };
+      if (fileToSend) {
+        const isImage = fileToSend.type.startsWith("image/");
+        const isPdf = fileToSend.type === "application/pdf";
+        const isWord = /word|msword|document/.test(fileToSend.type) || /\.(docx?|doc)$/i.test(fileToSend.name);
+        const isText = fileToSend.type === "text/plain" || fileToSend.type === "text/markdown" || /\.(txt|md)$/i.test(fileToSend.name);
+        if (isText) {
+          const text = await fileToSend.text();
+          payload.attachedFileContent = text;
+        } else if (isImage) {
+          const data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const b64 = (reader.result as string).split(",")[1];
+              resolve(b64 || "");
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(fileToSend);
+          });
+          payload.image = { media_type: fileToSend.type, data };
+        } else if (isPdf || isWord) {
+          const data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const b64 = (reader.result as string).split(",")[1];
+              resolve(b64 || "");
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(fileToSend);
+          });
+          payload.documentBase64 = data;
+          payload.documentMimeType = fileToSend.type;
+        } else {
+          const text = await fileToSend.text().catch(() => "");
+          if (text) payload.attachedFileContent = text;
+        }
+      }
+      const res = await api.post<{ reply: string }>("/api/notes/chat", payload);
       setMessages((m) => [...m, { role: "assistant", content: res.reply }]);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Could not get reply.";
@@ -218,48 +280,103 @@ export default function NoteView() {
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50} minSize={30}>
           <div className="h-full flex flex-col border-l bg-muted/20">
-            <div className="p-4 border-b">
-              <h2 className="font-semibold text-lg text-foreground">Hey, I&apos;m Sokrate AI</h2>
-              <p className="text-sm text-muted-foreground mt-1">I can work with you on your notes and answer any questions!</p>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.length === 0 && (
-                <p className="text-sm text-muted-foreground">Type a question here or type &apos;@&apos; to reference your notes.</p>
-              )}
-              {messages.map((m, i) => (
-                <div
-                  key={i}
-                  className={m.role === "user" ? "text-right" : "text-left"}
-                >
-                  <span
-                    className={
-                      m.role === "user"
-                        ? "inline-block rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm"
-                        : "inline-block rounded-lg bg-muted px-3 py-2 text-sm text-foreground"
-                    }
-                  >
-                    {m.content}
-                  </span>
+            <input
+              ref={chatFileInputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.doc,.docx,.txt,.md,.ppt,.pptx,.jpg,.jpeg,.png,.webp,image/*,application/pdf,text/plain,text/markdown"
+              onChange={handleChatFileSelect}
+              aria-label="Attach document"
+            />
+            {messages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 text-center">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+                  Hey, I&apos;m Sokrate AI
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground mt-2 max-w-sm">
+                  I can work with you on your notes and answer any questions!
+                </p>
+                <div className="w-full max-w-md mt-6 space-y-2">
+                  {attachedFile && (
+                    <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2 text-left text-sm">
+                      <span className="truncate flex-1 text-foreground">{attachedFile.name}</span>
+                      <span className="text-muted-foreground shrink-0">{formatFileSize(attachedFile.size)}</span>
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => setAttachedFile(null)} aria-label="Remove attachment">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1 rounded-xl border border-input bg-background px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
+                    <Input
+                      placeholder="Type a question here or type '@' to reference your notes..."
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
+                      className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground"
+                    />
+                    <Button type="button" variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Attach document" onClick={() => chatFileInputRef.current?.click()}>
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" size="icon" className="shrink-0 h-8 w-8" onClick={handleSendMessage} disabled={chatLoading || (!chatInput.trim() && !attachedFile)}>
+                      {chatLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
-              ))}
-              {chatLoading && (
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Thinking...
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {messages.map((m, i) => (
+                    <div
+                      key={i}
+                      className={m.role === "user" ? "text-right" : "text-left"}
+                    >
+                      <span
+                        className={
+                          m.role === "user"
+                            ? "inline-block rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm"
+                            : "inline-block rounded-lg bg-muted px-3 py-2 text-sm text-foreground"
+                        }
+                      >
+                        {m.content}
+                      </span>
+                    </div>
+                  ))}
+                  {chatLoading && (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Thinking...
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="p-4 border-t flex gap-2">
-              <Input
-                placeholder="Type a question..."
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
-              />
-              <Button onClick={handleSendMessage} disabled={chatLoading}>
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
+                <div className="p-4 border-t space-y-2">
+                  {attachedFile && (
+                    <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm">
+                      <span className="truncate flex-1 text-foreground">{attachedFile.name}</span>
+                      <span className="text-muted-foreground shrink-0">{formatFileSize(attachedFile.size)}</span>
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => setAttachedFile(null)} aria-label="Remove attachment">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1 rounded-xl border border-input bg-background px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
+                    <Input
+                      placeholder="Type a question here or type '@' to reference your notes..."
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
+                      className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground"
+                    />
+                    <Button type="button" variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Attach document" onClick={() => chatFileInputRef.current?.click()}>
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" size="icon" className="shrink-0 h-8 w-8" onClick={handleSendMessage} disabled={chatLoading || (!chatInput.trim() && !attachedFile)}>
+                      {chatLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </ResizablePanel>
       </Resizable>

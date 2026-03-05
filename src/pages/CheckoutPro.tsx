@@ -143,8 +143,8 @@ export default function CheckoutPro() {
         {!success && (
           <div className="mt-6 text-center">
             <Link
-              to="/pricing-selection"
-              className="text-sm text-gray-500 hover:text-gray-900"
+              to="/dashboard"
+              className="text-sm text-muted-foreground hover:text-foreground"
             >
               Cancel and return
             </Link>

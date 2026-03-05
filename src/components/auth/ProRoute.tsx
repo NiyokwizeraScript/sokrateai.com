@@ -1,15 +1,22 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { Loader2 } from "lucide-react";
+import { useUpgradeDialog } from "@/components/billing/UpgradeDialog";
 
 interface ProRouteProps {
   children: React.ReactNode;
 }
 
-/** Renders children only for Pro users; redirects Free users to pricing. */
+/** Renders children only for Pro users; opens upgrade dialog for Free users. */
 export function ProRoute({ children }: ProRouteProps) {
-  const location = useLocation();
   const { isPro, isLoading } = useUserProfile();
+  const { open: openUpgrade } = useUpgradeDialog();
+
+  useEffect(() => {
+    if (!isLoading && !isPro) {
+      openUpgrade();
+    }
+  }, [isLoading, isPro, openUpgrade]);
 
   if (isLoading) {
     return (
@@ -20,7 +27,12 @@ export function ProRoute({ children }: ProRouteProps) {
   }
 
   if (!isPro) {
-    return <Navigate to="/pricing-selection" state={{ from: location }} replace />;
+    return (
+      <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-muted-foreground">Upgrade to Pro to access this feature.</p>
+        <p className="text-sm text-muted-foreground">The upgrade dialog should be open above.</p>
+      </div>
+    );
   }
 
   return <>{children}</>;
