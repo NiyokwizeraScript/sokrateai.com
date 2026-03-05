@@ -84,10 +84,10 @@ function DashboardActionCard({
       onClick={onClick}
       className={cn(
         "group relative w-full text-left rounded-2xl border transition-all duration-200",
-        "bg-[#141820] hover:bg-[#191d27]",
-        "border-white/8 hover:border-emerald-500/40",
-        "shadow-[0_10px_30px_rgba(0,0,0,0.55)]",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+        "bg-card hover:bg-accent/80 dark:bg-[#141820] dark:hover:bg-[#191d27]",
+        "border-border hover:border-primary/40 dark:border-white/10 dark:hover:border-emerald-500/40",
+        "shadow-sm dark:shadow-[0_10px_30px_rgba(0,0,0,0.55)]",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
       )}
     >
       <div className="flex items-center justify-between gap-4 px-4 sm:px-5 py-3.5 sm:py-4">
@@ -101,16 +101,16 @@ function DashboardActionCard({
             <Icon className="h-5 w-5 text-white" strokeWidth={2.25} />
           </div>
           <div className="min-w-0">
-            <h3 className="font-heading font-semibold text-sm sm:text-base text-white">
+            <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground">
               {title}
             </h3>
-            <p className="text-xs sm:text-sm text-white/70 mt-0.5 truncate">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
               {subtitle}
             </p>
           </div>
         </div>
         <div className="flex items-center justify-center shrink-0">
-          <div className="w-8 h-8 rounded-full bg-white/5 border border-white/15 flex items-center justify-center text-white/80 group-hover:bg-emerald-500 group-hover:border-emerald-400 group-hover:text-white transition-colors">
+          <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground transition-colors">
             <ArrowRight className="h-4 w-4" />
           </div>
         </div>
@@ -359,10 +359,10 @@ export default function NotesDashboard() {
           progress={creatingProgress}
         />
       )}
-      <div className="px-4 lg:px-2 xl:px-4 py-4 lg:py-6 max-w-6xl mx-auto md:ml-4">
+      <div className="px-4 lg:px-2 xl:px-4 py-4 lg:py-6 max-w-6xl mx-auto">
         <div className="mb-5">
-          <h1 className="text-3xl font-heading font-bold text-white">Dashboard</h1>
-          <p className="text-sm text-white/70 mt-1 font-semibold">
+          <h1 className="text-3xl font-heading font-bold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1 font-semibold">
             Create new notes
           </p>
         </div>

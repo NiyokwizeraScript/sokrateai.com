@@ -70,7 +70,7 @@ export function AppSidebar() {
     <Sidebar
       variant="sidebar"
       collapsible="icon"
-      className="fixed inset-y-0 left-0 z-40 flex flex-col bg-[#050810] text-white border-r border-white/10"
+      className="fixed inset-y-0 left-0 z-40 flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border"
     >
       <SidebarHeader className="px-2.5 py-2 flex flex-row items-center justify-between gap-2 shrink-0">
         <Link
@@ -91,7 +91,7 @@ export function AppSidebar() {
           type="button"
           onClick={toggleSidebar}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-colors group-data-[state=collapsed]/sidebar-wrapper:mx-auto group-data-[state=collapsed]/sidebar-wrapper:self-center"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sidebar-border bg-sidebar-accent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors dark:border-white/15 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white group-data-[state=collapsed]/sidebar-wrapper:mx-auto group-data-[state=collapsed]/sidebar-wrapper:self-center"
         >
           {isCollapsed ? (
             <ChevronsRight className="h-4 w-4" />

@@ -22,10 +22,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0B0F14]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-          <p className="text-sm text-white/70">Loading...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );

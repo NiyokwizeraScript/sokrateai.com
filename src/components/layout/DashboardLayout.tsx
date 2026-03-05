@@ -1,18 +1,55 @@
-import { Outlet } from "react-router-dom";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { Outlet, useLocation } from "react-router-dom";
+import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "./Sidebar";
+import { cn } from "@/lib/utils";
+
+function DashboardContent() {
+  const { state } = useSidebar();
+  const location = useLocation();
+  const isCollapsed = state === "collapsed";
+
+  const path = location.pathname;
+  const isNotesRoute =
+    path === "/notes" || path.startsWith("/notes/") || path.startsWith("/note/");
+  const isDashboardOrSettingsOrAccountRoute =
+    path === "/dashboard" ||
+    path.startsWith("/dashboard/") ||
+    path === "/settings" ||
+    path.startsWith("/settings/") ||
+    path === "/account" ||
+    path.startsWith("/account/");
+
+  const collapsedPaddingClass = isNotesRoute
+    ? "md:pl-16"
+    : isDashboardOrSettingsOrAccountRoute
+    ? "md:pl-36"
+    : "md:pl-16";
+
+  const expandedPaddingClass = isDashboardOrSettingsOrAccountRoute
+    ? "md:pl-[16rem]"
+    : "md:pl-56";
+
+  return (
+    <div
+      className={cn(
+        "flex-1 flex flex-col gap-6 px-4 md:px-6 py-6 md:py-8 bg-background min-h-0 overflow-auto transition-[padding] duration-300 ease-out",
+        isCollapsed ? collapsedPaddingClass : expandedPaddingClass
+      )}
+    >
+      <Outlet />
+    </div>
+  );
+}
 
 export function DashboardLayout() {
   return (
-    <SidebarProvider className="min-h-svh bg-[#0B0F14]">
+    <SidebarProvider className="min-h-svh bg-background">
       <AppSidebar />
-      <SidebarInset className="bg-[#0B0F14]">
-        <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-[#050810] px-4 md:hidden">
+      <SidebarInset className="bg-background">
+        <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background px-4 md:hidden">
           <SidebarTrigger />
         </header>
-        <div className="flex-1 flex flex-col gap-6 px-4 md:px-6 py-6 md:py-8 bg-[#0B0F14] min-h-0 overflow-auto md:pl-56">
-          <Outlet />
-        </div>
+        <DashboardContent />
       </SidebarInset>
     </SidebarProvider>
   );
