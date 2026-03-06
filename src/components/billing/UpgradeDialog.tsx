@@ -5,8 +5,10 @@ import { SokrateLogo } from "@/components/auth/SokrateLogo";
 import { useAuth } from "@/contexts/AuthContext";
 import { FileUp, Users, Zap, BookOpen, MessageSquare } from "lucide-react";
 
+export type UpgradeReason = "free_limit" | undefined;
+
 interface UpgradeDialogContextValue {
-  open: () => void;
+  open: (options?: { reason?: UpgradeReason }) => void;
 }
 
 const UpgradeDialogContext = createContext<UpgradeDialogContextValue | null>(null);
@@ -19,16 +21,23 @@ export function useUpgradeDialog() {
   return ctx;
 }
 
+const FREE_LIMIT_DESCRIPTION =
+  "Free users can use only one feature once — document upload, link upload, or AI notes. After creating a note with one, the other two are locked. Pro users have unlimited access to all features.";
+
 export function UpgradeDialogProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState<UpgradeReason>(undefined);
   const { user } = useAuth();
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = (options?: { reason?: UpgradeReason }) => {
+    setReason(options?.reason);
+    setOpen(true);
+  };
 
   return (
     <UpgradeDialogContext.Provider value={{ open: handleOpen }}>
       {children}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setReason(undefined); }}>
         <DialogContent className="max-w-2xl bg-card text-card-foreground border border-border shadow-xl dark:bg-[#050810] dark:text-white dark:border-emerald-500/25 dark:shadow-[0_0_0_1px_rgba(16,185,129,0.15),0_0_40px_-8px_rgba(16,185,129,0.25),0_24px_80px_rgba(0,0,0,0.85)]">
           <DialogHeader className="mb-4">
             <div className="flex items-center justify-center mb-3">
@@ -38,7 +47,7 @@ export function UpgradeDialogProvider({ children }: { children: ReactNode }) {
               Upgrade to Pro
             </DialogTitle>
             <DialogDescription className="text-center text-sm sm:text-base text-muted-foreground dark:text-white/70">
-              Sokrate is faster, more intelligent, and unlimited with premium.
+              {reason === "free_limit" ? FREE_LIMIT_DESCRIPTION : "Sokrate is faster, more intelligent, and unlimited with premium."}
             </DialogDescription>
           </DialogHeader>
 

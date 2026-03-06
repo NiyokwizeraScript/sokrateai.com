@@ -38,11 +38,11 @@ export function RichNoteEditor({
   }, [onChange]);
 
   return (
-    <div className={cn("flex flex-col border rounded-lg bg-background overflow-hidden", className)}>
+    <div className={cn("flex flex-col border rounded-lg bg-background min-h-[200px]", className)}>
       <div
         ref={editorRef}
         contentEditable
-        className="flex-1 min-h-[200px] p-4 text-sm text-foreground outline-none prose prose-sm dark:prose-invert max-w-none [&_img]:max-w-full [&_img]:h-auto"
+        className="rich-note-editor-content min-h-[200px] p-4 text-sm text-foreground outline-none prose prose-sm dark:prose-invert max-w-none [&_img]:max-w-full [&_img]:h-auto font-[family-name:var(--font-satoshi)] leading-[1.65]"
         data-placeholder={placeholder}
         onInput={emitChange}
         onBlur={onBlur}

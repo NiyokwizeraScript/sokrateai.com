@@ -254,3 +254,115 @@
 .scrollbar-hero::-webkit-scrollbar-thumb:hover {
   background: hsl(160 50% 45% / 0.8);
 }
+
+/* Premium markdown: emerald-accented bullets for ul only */
+.premium-markdown .premium-markdown-ul li {
+  position: relative;
+  padding-left: 1.25rem;
+  line-height: 1.65;
+}
+.premium-markdown .premium-markdown-ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: hsl(160 84% 39%);
+}
+.dark .premium-markdown .premium-markdown-ul li::before {
+  background: hsl(160 70% 45%);
+}
+
+/* Rich note editor: premium structure for AI-generated HTML (emerald accents, spacing) */
+.rich-note-editor-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-left: 1rem;
+  border-left: 4px solid hsl(160 84% 39%);
+  line-height: 1.3;
+}
+.rich-note-editor-content h1:first-child { margin-top: 0; }
+.rich-note-editor-content h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1rem;
+  border-left: 4px solid hsl(160 84% 39%);
+  line-height: 1.35;
+}
+.rich-note-editor-content h2:first-child { margin-top: 0; }
+.rich-note-editor-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.375rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid hsl(160 84% 39% / 0.8);
+}
+.rich-note-editor-content p { margin-bottom: 0.75rem; line-height: 1.65; }
+.rich-note-editor-content p:last-child { margin-bottom: 0; }
+.rich-note-editor-content strong { font-weight: 600; color: inherit; }
+.rich-note-editor-content ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0.75rem;
+}
+.rich-note-editor-content ul li {
+  position: relative;
+  padding-left: 1.25rem;
+  line-height: 1.65;
+  margin-bottom: 0.25rem;
+}
+.rich-note-editor-content ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: hsl(160 84% 39%);
+}
+.dark .rich-note-editor-content ul li::before {
+  background: hsl(160 70% 45%);
+}
+.rich-note-editor-content blockquote {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid hsl(160 84% 39%);
+  border-radius: 0.75rem;
+  background: hsl(216 29% 6% / 0.5);
+}
+.dark .rich-note-editor-content blockquote {
+  background: rgba(255, 255, 255, 0.06);
+}
+.rich-note-editor-content pre,
+.rich-note-editor-content code {
+  border-radius: 0.5rem;
+  font-family: ui-monospace, monospace;
+}
+.rich-note-editor-content pre {
+  padding: 1rem;
+  margin: 0.75rem 0;
+  background: hsl(220 25% 4%);
+  border: 1px solid hsl(160 84% 39% / 0.15);
+  overflow-x: auto;
+}
+.dark .rich-note-editor-content pre {
+  background: rgba(0, 0, 0, 0.5);
+}
+.rich-note-editor-content :not(pre) > code {
+  padding: 0.125rem 0.375rem;
+  background: hsl(160 84% 39% / 0.15);
+  color: hsl(160 70% 40%);
+  font-size: 0.875em;
+}
+.dark .rich-note-editor-content :not(pre) > code {
+  background: hsl(160 70% 45% / 0.2);
+  color: hsl(160 80% 70%);
+}

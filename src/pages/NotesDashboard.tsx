@@ -40,6 +40,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUpgradeDialog } from "@/components/billing/UpgradeDialog";
 import { api } from "@/lib/api";
 import { validateFile, formatFileSize } from "@/lib/file-extractors";
 import { CreatingNotesLoading } from "@/components/notes/CreatingNotesLoading";
@@ -124,6 +126,8 @@ export default function NotesDashboard() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isPro } = useUserProfile();
+  const { open: openUpgrade } = useUpgradeDialog();
   const [search, setSearch] = useState("");
   const [youtubeOpen, setYoutubeOpen] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
@@ -178,6 +182,9 @@ export default function NotesDashboard() {
     enabled: !!user?.uid,
   });
 
+  /** Free: can create a note only if they have none. Pro: unlimited. */
+  const canCreateNote = isPro || myNotes.length === 0;
+
   const { data: sharedWithMe = [], isLoading: sharedLoading } = useQuery({
     queryKey: ["sharedWithMe", user?.email],
     queryFn: () => getSharedWithMe(user!.email ?? ""),
@@ -186,6 +193,10 @@ export default function NotesDashboard() {
 
   const handleBlank = async () => {
     if (!user?.uid) return;
+    if (!canCreateNote) {
+      openUpgrade({ reason: "free_limit" });
+      return;
+    }
     try {
       const noteId = await createNote(user.uid, { sourceType: "blank" });
       navigate(`/notes/${noteId}`);
@@ -207,6 +218,10 @@ export default function NotesDashboard() {
 
   const handleDocSubmit = async () => {
     if (!user?.uid || !docFile) return;
+    if (!canCreateNote) {
+      openUpgrade({ reason: "free_limit" });
+      return;
+    }
     setDocModalOpen(false);
     setDocLoading(true);
     startProgressSimulation();
@@ -284,6 +299,10 @@ export default function NotesDashboard() {
 
   const handleYoutubeSubmit = async () => {
     if (!user?.uid || !youtubeUrl.trim()) return;
+    if (!canCreateNote) {
+      openUpgrade({ reason: "free_limit" });
+      return;
+    }
     const urlToUse = youtubeUrl.trim();
     setYoutubeOpen(false);
     setYoutubeLoading(true);
@@ -373,14 +392,26 @@ export default function NotesDashboard() {
           title="Document upload"
           subtitle="PDF, DOC, PPT, images"
           gradient="from-emerald-500 to-teal-500"
-          onClick={() => setDocModalOpen(true)}
+          onClick={() => {
+            if (!canCreateNote) {
+              openUpgrade({ reason: "free_limit" });
+              return;
+            }
+            setDocModalOpen(true);
+          }}
         />
         <DashboardActionCard
           icon={LinkIcon}
           title="YouTube & links"
           subtitle="URL → AI notes"
           gradient="from-rose-500 to-pink-500"
-          onClick={() => setYoutubeOpen(true)}
+          onClick={() => {
+            if (!canCreateNote) {
+              openUpgrade({ reason: "free_limit" });
+              return;
+            }
+            setYoutubeOpen(true);
+          }}
         />
         <DashboardActionCard
           icon={FileText}

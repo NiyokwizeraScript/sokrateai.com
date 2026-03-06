@@ -8,6 +8,7 @@ import { Send, Loader2 } from "lucide-react";
 import { getSharedNote } from "@/lib/firestore";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { PremiumMarkdown } from "@/components/notes/PremiumMarkdown";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -73,9 +74,10 @@ export default function SharedNoteView() {
         <ResizablePanel defaultSize={50} minSize={30}>
           <div className="h-full overflow-y-auto p-4">
             <p className="text-xs text-muted-foreground mb-2">Shared note (read-only)</p>
-            <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap font-mono text-sm">
-              {noteContent || "No content."}
-            </div>
+            <div
+              className="rich-note-editor-content prose prose-sm dark:prose-invert max-w-none text-sm font-[family-name:var(--font-satoshi)] leading-[1.65]"
+              dangerouslySetInnerHTML={{ __html: noteContent || "<p class='text-muted-foreground'>No content.</p>" }}
+            />
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
@@ -91,15 +93,15 @@ export default function SharedNoteView() {
               )}
               {messages.map((m, i) => (
                 <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-                  <span
-                    className={
-                      m.role === "user"
-                        ? "inline-block rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm"
-                        : "inline-block rounded-lg bg-muted px-3 py-2 text-sm text-foreground"
-                    }
-                  >
-                    {m.content}
-                  </span>
+                  {m.role === "user" ? (
+                    <span className="inline-block rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm">
+                      {m.content}
+                    </span>
+                  ) : (
+                    <div className="inline-block w-full max-w-full rounded-xl border border-emerald-500/15 bg-[#0B0F14]/50 dark:bg-muted/80 px-4 py-3 text-left">
+                      <PremiumMarkdown content={m.content} className="text-sm" />
+                    </div>
+                  )}
                 </div>
               ))}
               {chatLoading && (

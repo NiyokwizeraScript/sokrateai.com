@@ -5,6 +5,7 @@ import { Resizable, ResizablePanel, ResizableHandle } from "@/components/ui/resi
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RichNoteEditor } from "@/components/notes/RichNoteEditor";
+import { PremiumMarkdown } from "@/components/notes/PremiumMarkdown";
 import {
   Dialog,
   DialogContent,
@@ -274,15 +275,17 @@ export default function NoteView() {
 
       <Resizable direction="horizontal" className="flex-1 min-h-0">
         <ResizablePanel defaultSize={50} minSize={30}>
-          <div className="h-full flex flex-col p-4 overflow-hidden">
-            <p className="text-xs text-muted-foreground/80 mb-2">All changes and edits are auto-saved. No need to save manually.</p>
-            <RichNoteEditor
-              value={content}
-              onChange={setContent}
-              onBlur={handleSaveContent}
-              placeholder="Type your notes..."
-              className="flex-1 min-h-0"
-            />
+          <div className="h-full flex flex-col min-h-0 p-4">
+            <p className="text-xs text-muted-foreground/80 mb-2 shrink-0">All changes and edits are auto-saved. No need to save manually.</p>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <RichNoteEditor
+                value={content}
+                onChange={setContent}
+                onBlur={handleSaveContent}
+                placeholder="Type your notes..."
+                className="min-h-0"
+              />
+            </div>
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
@@ -374,15 +377,15 @@ export default function NoteView() {
                       key={i}
                       className={m.role === "user" ? "text-right" : "text-left"}
                     >
-                      <span
-                        className={
-                          m.role === "user"
-                            ? "inline-block rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm"
-                            : "inline-block rounded-lg bg-muted px-3 py-2 text-sm text-foreground"
-                        }
-                      >
-                        {m.content}
-                      </span>
+                      {m.role === "user" ? (
+                        <span className="inline-block rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm">
+                          {m.content}
+                        </span>
+                      ) : (
+                        <div className="inline-block w-full max-w-full rounded-xl border border-emerald-500/15 bg-[#0B0F14]/50 dark:bg-muted/80 px-4 py-3 text-left">
+                          <PremiumMarkdown content={m.content} className="text-sm" />
+                        </div>
+                      )}
                     </div>
                   ))}
                   {chatLoading && (

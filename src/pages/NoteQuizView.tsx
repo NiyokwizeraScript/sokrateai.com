@@ -11,6 +11,7 @@ import { getNote } from "@/lib/firestore";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { PremiumMarkdown } from "@/components/notes/PremiumMarkdown";
 
 interface QuizQuestion {
   id: number;
@@ -207,15 +208,15 @@ export default function NoteQuizView() {
               )}
               {messages.map((m, i) => (
                 <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-                  <span
-                    className={
-                      m.role === "user"
-                        ? "inline-block rounded-lg bg-amber-600 text-white px-3 py-2 text-sm"
-                        : "inline-block rounded-lg bg-muted px-3 py-2 text-sm text-foreground"
-                    }
-                  >
-                    {m.content}
-                  </span>
+                  {m.role === "user" ? (
+                    <span className="inline-block rounded-lg bg-amber-600 text-white px-3 py-2 text-sm">
+                      {m.content}
+                    </span>
+                  ) : (
+                    <div className="inline-block w-full max-w-full rounded-xl border border-amber-500/15 bg-[#0B0F14]/50 dark:bg-muted/80 px-4 py-3 text-left">
+                      <PremiumMarkdown content={m.content} className="text-sm" />
+                    </div>
+                  )}
                 </div>
               ))}
               {chatLoading && (
