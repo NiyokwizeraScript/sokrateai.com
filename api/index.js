@@ -425,6 +425,41 @@ ${content}`;
     }
 });
 
+// Notes: generate flashcards from note content
+app.post('/api/notes/flashcards', async (req, res) => {
+    if (!genAI && !anthropic) {
+        return res.status(503).json({ error: 'Add GEMINI_API_KEY or ANTHROPIC_API_KEY to .env' });
+    }
+    try {
+        const { noteContent } = req.body;
+        const content = (noteContent || '').slice(0, 20000);
+        const prompt = `Generate 8–12 flashcards from the following notes. Return a JSON array only, no markdown. Each item: { "front": "term or question", "back": "definition or answer" }. Keep front and back concise (one short sentence each).
+
+Notes:
+${content}`;
+
+        let rawText = '';
+        if (genAI) {
+            const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+            const result = await model.generateContent(prompt);
+            rawText = result.response?.text?.() ?? '';
+        } else {
+            const msg = await anthropic.messages.create({
+                model: MODEL_ID,
+                max_tokens: 2048,
+                messages: [{ role: 'user', content: prompt }],
+            });
+            rawText = msg.content[0].text;
+        }
+        const text = rawText.replace(/```json\n?|```/g, '').trim();
+        const cards = JSON.parse(text);
+        res.json({ cards: Array.isArray(cards) ? cards : [] });
+    } catch (error) {
+        console.error('[Server] notes/flashcards Error:', error);
+        res.status(500).json({ error: error.message || 'Flashcards failed' });
+    }
+});
+
 // Helpers: extract YouTube video ID; fetch webpage text
 function youtubeVideoId(url) {
     const u = url.trim();

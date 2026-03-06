@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Share2, Trophy, Send, Loader2, Trash2, ArrowLeft, Paperclip, X } from "lucide-react";
+import { Share2, Trophy, Send, Loader2, Trash2, ArrowLeft, Paperclip, X, HelpCircle, Layers } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getNote, updateNote, shareNoteToEmail, deleteNote } from "@/lib/firestore";
 import {
@@ -232,10 +232,18 @@ export default function NoteView() {
           <Share2 className="h-4 w-4 mr-1" />
           Share
         </Button>
-        <Button size="sm" onClick={() => navigate(`/notes/${noteId}/quiz`)}>
-          <Trophy className="h-4 w-4 mr-1" />
-          Quiz
-        </Button>
+        {messages.length > 0 && (
+          <>
+            <Button size="sm" onClick={() => navigate(`/notes/${noteId}/quiz`)} className="bg-amber-500 hover:bg-amber-600 text-white border-0">
+              <Trophy className="h-4 w-4 mr-1" />
+              Quiz
+            </Button>
+            <Button size="sm" onClick={() => navigate(`/notes/${noteId}/flashcards`)} className="bg-violet-500 hover:bg-violet-600 text-white border-0">
+              <Layers className="h-4 w-4 mr-1" />
+              Flashcards
+            </Button>
+          </>
+        )}
         <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete note">
@@ -290,6 +298,41 @@ export default function NoteView() {
             />
             {messages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 text-center">
+                <div className="w-full max-w-md grid grid-cols-2 gap-3 mb-8">
+                  <button
+                    type="button"
+                    onClick={() => noteId && navigate(`/notes/${noteId}/quiz`)}
+                    className="relative rounded-xl border-2 border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/50 dark:hover:to-orange-900/40 p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 shadow-sm hover:shadow"
+                  >
+                    <span className="absolute top-2 right-2 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      Popular
+                    </span>
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-amber-500/25 flex items-center justify-center shrink-0">
+                        <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground">Quizzes</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">Test your knowledge</p>
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => noteId && navigate(`/notes/${noteId}/flashcards`)}
+                    className="rounded-xl border-2 border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/40 dark:to-indigo-950/30 hover:from-violet-100 hover:to-indigo-100 dark:hover:from-violet-900/50 dark:hover:to-indigo-900/40 p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 shadow-sm hover:shadow"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-violet-500/25 flex items-center justify-center shrink-0">
+                        <Layers className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground">Flashcards</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">Study with active recall</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
                   Hey, I&apos;m Sokrate AI
                 </h2>

@@ -15,6 +15,7 @@ import Onboarding from "@/pages/Onboarding";
 import NotesDashboard from "@/pages/NotesDashboard";
 import NoteView from "@/pages/NoteView";
 import NoteQuizView from "@/pages/NoteQuizView";
+import NoteFlashcardsView from "@/pages/NoteFlashcardsView";
 import SharedNoteView from "@/pages/SharedNoteView";
 import Feedback from "@/pages/Feedback";
 // Removed from nav – keep files in repo for later use:
@@ -70,6 +71,7 @@ function App() {
               <Route path="/dashboard" element={<NotesDashboard />} />
               <Route path="/notes/:noteId" element={<NoteView />} />
               <Route path="/notes/:noteId/quiz" element={<NoteQuizView />} />
+              <Route path="/notes/:noteId/flashcards" element={<NoteFlashcardsView />} />
               <Route path="/shared/:shareId" element={<SharedNoteView />} />
               {/* Removed from nav – pages kept in src/pages/ for later: tools/dashboard, solver, synthesizer, quizzes, history */}
               <Route path="/feedback" element={<ProRoute><Feedback /></ProRoute>} />

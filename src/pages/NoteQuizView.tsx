@@ -112,7 +112,7 @@ export default function NoteQuizView() {
           Back to notes
         </Button>
         <div className="flex-1" />
-        <span className="flex items-center gap-1 text-sm font-medium text-foreground">
+        <span className="flex items-center gap-1 text-sm font-medium text-amber-700 dark:text-amber-400">
           <Trophy className="h-4 w-4" />
           Quiz
         </span>
@@ -122,22 +122,27 @@ export default function NoteQuizView() {
         <ResizablePanel defaultSize={50} minSize={30}>
           <div className="h-full overflow-y-auto p-4">
             {quizLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+                <div className="rounded-full bg-amber-500/20 p-4">
+                  <Loader2 className="h-10 w-10 animate-spin text-amber-600 dark:text-amber-400" />
+                </div>
+                <p className="text-sm font-medium text-foreground">Creating your quiz…</p>
               </div>
             ) : !questions?.length ? (
               <p className="text-sm text-muted-foreground">No questions generated.</p>
             ) : (
               <div className="space-y-4">
                 {showResults && (
-                  <p className="text-sm font-medium text-foreground">
-                    Score: {correctCount}/{total}
-                  </p>
+                  <div className="rounded-xl bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-200 dark:border-amber-800 px-4 py-3">
+                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+                      Score: {correctCount}/{total}
+                    </p>
+                  </div>
                 )}
                 {questions.map((q) => (
-                  <Card key={q.id}>
-                    <CardContent className="pt-4">
-                      <p className="font-medium text-foreground mb-2">{q.question}</p>
+                  <Card key={q.id} className="border-2 border-amber-100 dark:border-amber-900/50 overflow-hidden">
+                    <CardContent className="pt-4 bg-gradient-to-b from-amber-50/50 to-transparent dark:from-amber-950/30 dark:to-transparent">
+                      <p className="font-medium text-foreground mb-3">{q.question}</p>
                       <ul className="space-y-2">
                         {q.options.map((opt, idx) => {
                           const isChosen = answers[q.id] === idx;
@@ -151,10 +156,11 @@ export default function NoteQuizView() {
                                 onClick={() => !showResults && setAnswers((a) => ({ ...a, [q.id]: idx }))}
                                 disabled={showResults}
                                 className={cn(
-                                  "w-full text-left rounded-lg border px-3 py-2 text-sm transition-colors",
-                                  showCorrect && "border-green-500 bg-green-500/10",
-                                  showWrong && "border-red-500 bg-red-500/10",
-                                  !showResults && isChosen && "border-primary bg-primary/10"
+                                  "w-full text-left rounded-xl border-2 px-4 py-2.5 text-sm transition-all",
+                                  showCorrect && "border-emerald-500 bg-emerald-500/15 text-emerald-800 dark:text-emerald-200",
+                                  showWrong && "border-red-500 bg-red-500/15 text-red-800 dark:text-red-200",
+                                  !showResults && isChosen && "border-amber-500 bg-amber-500/15 text-amber-900 dark:text-amber-100",
+                                  !showResults && !isChosen && "border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-950/30"
                                 )}
                               >
                                 {opt}
@@ -167,11 +173,20 @@ export default function NoteQuizView() {
                   </Card>
                 ))}
                 {!showResults ? (
-                  <Button onClick={() => setShowResults(true)} className="w-full" size="lg">
+                  <Button
+                    onClick={() => setShowResults(true)}
+                    className="w-full rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+                    size="lg"
+                  >
                     Submit & see results
                   </Button>
                 ) : (
-                  <Button onClick={handleRetryQuiz} variant="outline" className="w-full" size="lg">
+                  <Button
+                    onClick={handleRetryQuiz}
+                    variant="outline"
+                    className="w-full rounded-xl border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/50"
+                    size="lg"
+                  >
                     Try another quiz
                   </Button>
                 )}
@@ -182,7 +197,7 @@ export default function NoteQuizView() {
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50} minSize={30}>
           <div className="h-full flex flex-col border-l bg-muted/20">
-            <div className="p-4 border-b">
+            <div className="p-4 border-b bg-gradient-to-r from-amber-500/5 to-transparent">
               <p className="font-medium text-foreground">Ask about your notes</p>
               <p className="text-sm text-muted-foreground">Get help while you quiz.</p>
             </div>
@@ -195,7 +210,7 @@ export default function NoteQuizView() {
                   <span
                     className={
                       m.role === "user"
-                        ? "inline-block rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm"
+                        ? "inline-block rounded-lg bg-amber-600 text-white px-3 py-2 text-sm"
                         : "inline-block rounded-lg bg-muted px-3 py-2 text-sm text-foreground"
                     }
                   >
@@ -217,7 +232,7 @@ export default function NoteQuizView() {
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
               />
-              <Button onClick={handleSendMessage} disabled={chatLoading}>
+              <Button onClick={handleSendMessage} disabled={chatLoading} className="bg-amber-600 hover:bg-amber-700">
                 <Send className="h-4 w-4" />
               </Button>
             </div>
