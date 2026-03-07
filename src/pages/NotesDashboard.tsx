@@ -251,7 +251,17 @@ export default function NotesDashboard() {
         const ext = docFile.name.toLowerCase().slice(docFile.name.lastIndexOf("."));
         const documentMimeType =
           docFile.type ||
-          (ext === ".pdf" ? "application/pdf" : ext === ".docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : ext === ".doc" ? "application/msword" : "application/octet-stream");
+          (ext === ".pdf" ? "application/pdf"
+            : ext === ".docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : ext === ".doc" ? "application/msword"
+            : ext === ".pptx" ? "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            : ext === ".ppt" ? "application/vnd.ms-powerpoint"
+            : ext === ".xlsx" ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            : ext === ".xls" ? "application/vnd.ms-excel"
+            : ext === ".odt" ? "application/vnd.oasis.opendocument.text"
+            : ext === ".odp" ? "application/vnd.oasis.opendocument.presentation"
+            : ext === ".ods" ? "application/vnd.oasis.opendocument.spreadsheet"
+            : "application/octet-stream");
         const res = await api.post<{ synthesis: string }>("/api/synthesize", {
           fileContent,
           documentBase64,
@@ -549,7 +559,7 @@ export default function NotesDashboard() {
                 id="doc-upload"
                 type="file"
                 className="hidden"
-                accept=".pdf,.doc,.docx,.txt,.md,.ppt,.pptx,.jpg,.jpeg,.png"
+                accept=".pdf,.doc,.docx,.txt,.md,.ppt,.pptx,.xlsx,.xls,.odt,.odp,.ods,.rtf,.jpg,.jpeg,.png,.webp"
                 onChange={handleDocSelect}
               />
               {docFile ? (

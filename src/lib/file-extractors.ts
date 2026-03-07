@@ -4,7 +4,7 @@ export function getFileType(file: File): SupportedFileType {
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     if (ext === "pdf") return "pdf";
     if (["jpg", "jpeg", "png", "gif", "webp", "bmp", "heic"].includes(ext)) return "image";
-    if (["doc", "docx", "pptx", "xlsx"].includes(ext)) return "document";
+    if (["doc", "docx", "ppt", "pptx", "xls", "xlsx", "odt", "odp", "ods"].includes(ext)) return "document";
     return "text";
 }
 
@@ -33,13 +33,20 @@ export function validateFile(file: File, maxSizeMB: number = 10): { valid: boole
         "application/msword", // .doc
         "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
         "application/vnd.ms-powerpoint", // .ppt
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+        "application/vnd.ms-excel", // .xls
+        "application/vnd.oasis.opendocument.text", // .odt
+        "application/vnd.oasis.opendocument.presentation", // .odp
+        "application/vnd.oasis.opendocument.spreadsheet", // .ods
+        "application/rtf",
+        "text/rtf",
     ];
-    const allowedExtensions = [".pdf", ".doc", ".docx", ".txt", ".md", ".ppt", ".pptx", ".jpg", ".jpeg", ".png", ".webp"];
+    const allowedExtensions = [".pdf", ".doc", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".xls", ".odt", ".odp", ".ods", ".rtf", ".jpg", ".jpeg", ".png", ".webp"];
     const ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
     const typeOk = allowedTypes.includes(file.type) || file.type.startsWith("text/");
     const extOk = allowedExtensions.some((e) => ext === e);
     if (!typeOk && !extOk) {
-        return { valid: false, error: "Unsupported file type. Use PDF, Word, PowerPoint, text, or images." };
+        return { valid: false, error: "Unsupported file type. Use PDF, Word, PowerPoint, Excel, OpenDocument, RTF, text, or images." };
     }
     return { valid: true };
 }

@@ -8,6 +8,7 @@ import Stripe from 'stripe';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mammoth from 'mammoth';
+import { parseOffice } from 'officeparser';
 
 dotenv.config();
 
@@ -212,8 +213,20 @@ ${fileContent ? fileContent.substring(0, 20000) : "No text provided. Use image o
     }
 });
 
-// MIME types Gemini accepts as inline documents (e.g. PDF). DOCX/Word must be extracted to text first.
+// MIME types Gemini accepts as inline documents (e.g. PDF). Others must be extracted to text first.
 const GEMINI_INLINE_DOCUMENT_TYPES = new Set(['application/pdf']);
+
+// MIME types that officeparser supports (PPTX, XLSX, ODP, ODS, ODT, RTF). DOCX/DOC use mammoth.
+const OFFICEPARSER_MIME_TYPES = new Set([
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    'application/vnd.ms-powerpoint', // .ppt
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-excel', // .xls
+    'application/vnd.oasis.opendocument.presentation', // .odp
+    'application/vnd.oasis.opendocument.spreadsheet', // .ods
+    'application/vnd.oasis.opendocument.text', // .odt
+    'application/rtf', 'text/rtf',
+]);
 
 // Synthesize Endpoint (uses Gemini if GEMINI_API_KEY set, else Anthropic)
 app.post('/api/synthesize', async (req, res) => {
@@ -221,17 +234,23 @@ app.post('/api/synthesize', async (req, res) => {
         let { fileContent, image, documentBase64, documentMimeType } = req.body;
         const hasDocument = !!(documentBase64 && documentMimeType);
 
-        // DOCX/Word: Gemini doesn't support them inline — extract text and use as fileContent
         if (hasDocument && !GEMINI_INLINE_DOCUMENT_TYPES.has(documentMimeType)) {
+            const buffer = Buffer.from(documentBase64, 'base64');
             try {
-                const buffer = Buffer.from(documentBase64, 'base64');
-                const result = await mammoth.extractRawText({ buffer });
-                const extracted = (result && result.value) ? result.value.trim() : '';
+                let extracted = '';
+                if (OFFICEPARSER_MIME_TYPES.has(documentMimeType)) {
+                    const ast = await parseOffice(buffer);
+                    extracted = (ast && typeof ast.toText === 'function' ? ast.toText() : '').trim();
+                } else {
+                    // DOCX/DOC: use mammoth
+                    const result = await mammoth.extractRawText({ buffer });
+                    extracted = (result && result.value) ? result.value.trim() : '';
+                }
                 fileContent = extracted ? `Document content:\n\n${extracted}` : (fileContent || 'No text extracted from document.');
                 documentBase64 = null;
                 documentMimeType = null;
             } catch (extractErr) {
-                console.error('[Server] DOCX/text extraction failed:', extractErr);
+                console.error('[Server] Document text extraction failed:', extractErr);
                 fileContent = (fileContent || '') + '\n[Could not extract text from document.]';
                 documentBase64 = null;
                 documentMimeType = null;
@@ -328,13 +347,19 @@ app.post('/api/notes/chat', async (req, res) => {
         if (documentBase64 && documentMimeType && !GEMINI_INLINE_DOCUMENT_TYPES.has(documentMimeType)) {
             try {
                 const buffer = Buffer.from(documentBase64, 'base64');
-                const result = await mammoth.extractRawText({ buffer });
-                const extracted = (result && result.value) ? result.value.trim() : '';
+                let extracted = '';
+                if (OFFICEPARSER_MIME_TYPES.has(documentMimeType)) {
+                    const ast = await parseOffice(buffer);
+                    extracted = (ast && typeof ast.toText === 'function' ? ast.toText() : '').trim();
+                } else {
+                    const result = await mammoth.extractRawText({ buffer });
+                    extracted = (result && result.value) ? result.value.trim() : '';
+                }
                 attachedFileContent = (attachedFileContent ? attachedFileContent + '\n\n' : '') + (extracted || '[Could not extract text from document.]');
                 documentBase64 = null;
                 documentMimeType = null;
             } catch (extractErr) {
-                console.error('[Server] notes/chat DOCX extraction failed:', extractErr);
+                console.error('[Server] notes/chat document extraction failed:', extractErr);
                 attachedFileContent = (attachedFileContent || '') + '\n[Could not extract text from document.]';
                 documentBase64 = null;
                 documentMimeType = null;
