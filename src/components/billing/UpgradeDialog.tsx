@@ -22,7 +22,7 @@ export function useUpgradeDialog() {
 }
 
 const FREE_LIMIT_DESCRIPTION =
-  "Free users can use only one feature once — document upload, link upload, or AI notes. After creating a note with one, the other two are locked. Pro users have unlimited access to all features.";
+  "Free users can use only one feature once — document upload, link upload, AI notes, or voice recording. After creating a note with one, the others are locked. Pro users have unlimited access to all features.";
 
 export function UpgradeDialogProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);

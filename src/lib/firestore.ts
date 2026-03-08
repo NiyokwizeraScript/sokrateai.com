@@ -172,7 +172,7 @@ export async function deleteFeedbackItem(feedbackId: string): Promise<void> {
 }
 
 // --- Notes (users/{uid}/notes) ---
-export type NoteSourceType = "blank" | "document" | "youtube";
+export type NoteSourceType = "blank" | "document" | "youtube" | "recording";
 
 export interface NoteRecord {
   id: string;

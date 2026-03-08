@@ -333,6 +333,52 @@ ${sendDocumentInline ? "\nAn attached document is also provided; your notes must
     }
 });
 
+// Voice recording: send audio directly to Gemini; Gemini transcribes and generates structured notes in one call
+const GEMINI_AUDIO_MODEL = process.env.GEMINI_AUDIO_MODEL_NAME?.trim() || 'gemini-2.5-pro';
+
+app.post('/api/notes/from-recording', async (req, res) => {
+    try {
+        const { audioBase64, mimeType } = req.body || {};
+        if (!audioBase64 || typeof audioBase64 !== 'string') {
+            return res.status(400).json({ error: 'audioBase64 required' });
+        }
+        if (!genAI) {
+            return res.status(503).json({ error: 'Voice recording requires GEMINI_API_KEY. Add it to your .env.' });
+        }
+
+        const prompt = `Transcribe this audio and generate structured, exam-ready study notes following our existing Sokrate formatting rules.
+
+Rules for the notes:
+1. CONTENT: Use only what is actually spoken in the audio. Do not invent or infer content.
+2. VISUAL STYLE — write so it looks clean and easy to read:
+   - Headings: use # for the main title, ## for main sections, ### for subsections. Put a blank line after every heading.
+   - Paragraphs: short paragraphs (2–4 sentences). Blank line between paragraphs.
+   - Lists: simple bullets (one "- " per line). Blank line between sections.
+   - Bold: use **only** for key terms, not whole lines.
+3. Output only the notes in markdown. No intro line like "Here are your notes" or "Based on the recording."`;
+
+        const model = genAI.getGenerativeModel({ model: GEMINI_AUDIO_MODEL });
+        const audioMime = mimeType && mimeType.startsWith('audio/') ? mimeType : 'audio/webm';
+        const result = await model.generateContent([
+            { text: prompt },
+            {
+                inlineData: {
+                    mimeType: audioMime,
+                    data: audioBase64,
+                },
+            },
+        ]);
+        const content = result.response?.text?.() ?? '';
+        if (!content.trim()) {
+            return res.status(400).json({ error: 'No content generated. The recording may be inaudible or unsupported.' });
+        }
+        res.json({ title: 'Voice recording', content });
+    } catch (error) {
+        console.error('[Server] from-recording Error:', error);
+        res.status(500).json({ error: error?.message || 'Transcription or note generation failed' });
+    }
+});
+
 // Notes: chat with note context (Gemini or Anthropic). Supports optional attachments: text, image, PDF/DOC.
 app.post('/api/notes/chat', async (req, res) => {
     if (!genAI && !anthropic) {

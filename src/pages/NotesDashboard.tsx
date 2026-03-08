@@ -19,6 +19,8 @@ import {
   Search,
   Trash2,
   ArrowRight,
+  Mic,
+  Square,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -138,6 +140,13 @@ export default function NotesDashboard() {
   const [creatingProgress, setCreatingProgress] = useState(0);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const notesSectionRef = useRef<HTMLDivElement>(null);
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
+  const [voiceLoading, setVoiceLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     return () => {
@@ -171,9 +180,97 @@ export default function NotesDashboard() {
     setTimeout(() => {
       setDocLoading(false);
       setYoutubeLoading(false);
+      setVoiceLoading(false);
       setCreatingProgress(0);
       navigate(`/notes/${noteId}`);
     }, 600);
+  };
+
+  const handleStartRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      audioChunksRef.current = [];
+      const mr = new MediaRecorder(stream);
+      mediaRecorderRef.current = mr;
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      mr.onstop = () => {
+        if (audioChunksRef.current.length) {
+          setRecordedBlob(new Blob(audioChunksRef.current, { type: mr.mimeType || "audio/webm" }));
+        }
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      };
+      mr.start();
+      setIsRecording(true);
+      setRecordedBlob(null);
+    } catch (err) {
+      toast({
+        title: "Microphone access needed",
+        description: err instanceof Error ? err.message : "Allow microphone to record.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+    }
+    setIsRecording(false);
+  };
+
+  const blobToBase64 = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl.includes(",") ? dataUrl.split(",")[1] : "");
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+  const handleVoiceSubmit = async () => {
+    if (!user?.uid || !recordedBlob) return;
+    if (!canCreateNote) {
+      openUpgrade({ reason: "free_limit" });
+      return;
+    }
+    setVoiceModalOpen(false);
+    setVoiceLoading(true);
+    startProgressSimulation();
+    try {
+      const audioBase64 = await blobToBase64(recordedBlob);
+      const res = await api.post<{ title: string; content: string }>("/api/notes/from-recording", {
+        audioBase64,
+        mimeType: recordedBlob.type || "audio/webm",
+      });
+      const content = markdownToNoteHtml(res.content || "");
+      const noteId = await createNote(user.uid, {
+        sourceType: "recording",
+        title: res.title || "Voice recording",
+        content,
+      });
+      setRecordedBlob(null);
+      finishProgressAndNavigate(noteId);
+    } catch (err) {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      setCreatingProgress(0);
+      setVoiceLoading(false);
+      const message = err instanceof Error ? err.message : "Transcription or note generation failed.";
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+    }
   };
 
   const { data: myNotes = [], isLoading: notesLoading } = useQuery({
@@ -382,9 +479,9 @@ export default function NotesDashboard() {
 
   return (
     <>
-      {(docLoading || youtubeLoading) && (
+      {(docLoading || youtubeLoading || voiceLoading) && (
         <CreatingNotesLoading
-          message={docLoading ? "Processing document..." : "Processing link..."}
+          message={docLoading ? "Processing document..." : youtubeLoading ? "Processing link..." : "Transcribing and generating notes..."}
           progress={creatingProgress}
         />
       )}
@@ -429,6 +526,20 @@ export default function NotesDashboard() {
           subtitle="Start from scratch"
           gradient="from-violet-500 to-purple-500"
           onClick={handleBlank}
+        />
+        <DashboardActionCard
+          icon={Mic}
+          title="Voice Recording"
+          subtitle="Record → AI notes"
+          gradient="from-sky-500 to-blue-500"
+          onClick={() => {
+            if (!canCreateNote) {
+              openUpgrade({ reason: "free_limit" });
+              return;
+            }
+            setRecordedBlob(null);
+            setVoiceModalOpen(true);
+          }}
         />
       </div>
 
@@ -538,6 +649,47 @@ export default function NotesDashboard() {
               {youtubeLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Generate Notes
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={voiceModalOpen} onOpenChange={(open) => { setVoiceModalOpen(open); if (!open) { handleStopRecording(); setRecordedBlob(null); } }}>
+        <DialogContent className="bg-background text-foreground border-border">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Voice Recording</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground">
+              Record your voice and we’ll transcribe it and turn it into structured notes.
+            </p>
+            {isRecording ? (
+              <div className="flex items-center gap-3 py-4">
+                <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" aria-hidden />
+                <span className="text-sm font-medium">Recording…</span>
+                <Button type="button" variant="outline" size="sm" onClick={handleStopRecording} className="ml-auto">
+                  <Square className="h-4 w-4 mr-1" />
+                  Stop
+                </Button>
+              </div>
+            ) : recordedBlob ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">Recording ready. Generate notes or record again.</p>
+                <div className="flex gap-2">
+                  <Button className="flex-1" onClick={handleVoiceSubmit}>
+                    Generate Notes
+                  </Button>
+                  <Button variant="outline" onClick={() => { setRecordedBlob(null); handleStartRecording(); }}>
+                    <Mic className="h-4 w-4 mr-1" />
+                    Record again
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button className="w-full" onClick={handleStartRecording}>
+                <Mic className="h-4 w-4 mr-2" />
+                Start recording
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
