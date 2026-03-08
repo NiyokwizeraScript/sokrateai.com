@@ -38,7 +38,7 @@ const plans: Plan[] = [
   },
   {
     name: "Pro",
-    price: "$19",
+    price: "$19.99",
     period: "per month",
     description: "Full access to all features",
     features: [

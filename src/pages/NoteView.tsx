@@ -273,9 +273,9 @@ export default function NoteView() {
         </AlertDialog>
       </header>
 
-      <Resizable direction="horizontal" className="flex-1 min-h-0">
-        <ResizablePanel defaultSize={50} minSize={30}>
-          <div className="h-full flex flex-col min-h-0 p-4">
+      <Resizable direction="horizontal" className="flex-1 min-h-0 flex">
+        <ResizablePanel defaultSize={50} minSize={30} className="min-h-0 flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden p-4">
             <p className="text-xs text-muted-foreground/80 mb-2 shrink-0">All changes and edits are auto-saved. No need to save manually.</p>
             <div className="flex-1 min-h-0 overflow-y-auto">
               <RichNoteEditor
@@ -283,14 +283,14 @@ export default function NoteView() {
                 onChange={setContent}
                 onBlur={handleSaveContent}
                 placeholder="Type your notes..."
-                className="min-h-0"
+                className="min-h-full"
               />
             </div>
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={50} minSize={30}>
-          <div className="h-full flex flex-col border-l bg-muted/20">
+        <ResizablePanel defaultSize={50} minSize={30} className="min-h-0 flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden border-l bg-muted/20">
             <input
               ref={chatFileInputRef}
               type="file"

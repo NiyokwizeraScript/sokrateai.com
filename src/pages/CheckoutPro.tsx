@@ -37,7 +37,7 @@ const ProductDisplay = ({ userId }: { userId?: string | null }) => (
   <div className="flex flex-col items-center">
     <div className="text-center mb-8">
       <h1 className="text-3xl font-heading font-bold mb-2">Sokrate AI Pro</h1>
-      <p className="text-xl text-gray-600">US$19.00 / month</p>
+      <p className="text-xl text-gray-600">$19.99 / month</p>
     </div>
     <form
       action="/api/create-checkout-session"

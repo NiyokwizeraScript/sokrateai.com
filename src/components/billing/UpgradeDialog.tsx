@@ -22,7 +22,7 @@ export function useUpgradeDialog() {
 }
 
 const FREE_LIMIT_DESCRIPTION =
-  "Free users can use only one feature once — document upload, link upload, AI notes, or voice recording. After creating a note with one, the others are locked. Pro users have unlimited access to all features.";
+  "Free users can use only one feature once — document upload, AI notes, or voice recording. After creating a note with one, the others are locked. Pro users have unlimited access to all features.";
 
 export function UpgradeDialogProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -54,7 +54,7 @@ export function UpgradeDialogProvider({ children }: { children: ReactNode }) {
           <div className="space-y-5">
             <ul className="space-y-3 text-sm text-foreground/90 dark:text-white/85">
               {[
-                { icon: FileUp, text: "Unlimited PDF uploads, audio hours, and YouTube videos." },
+                { icon: FileUp, text: "Unlimited document uploads and voice recordings." },
                 { icon: Users, text: "Collaborate with Sokrate on more complex tasks." },
                 { icon: Zap, text: "Unlimited faster AI edits." },
                 { icon: BookOpen, text: "Unlimited and better quizzes and flashcards." },

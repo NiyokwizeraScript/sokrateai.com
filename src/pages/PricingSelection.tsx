@@ -118,7 +118,7 @@ export default function PricingSelection() {
               <CardDescription>Full access to all features</CardDescription>
               <div className="mt-4">
                 <span className="text-4xl font-bold text-slate-900 dark:text-foreground font-heading">
-                  $19
+                  $19.99
                 </span>
                 <span className="text-gray-600 dark:text-muted-foreground ml-2">/month</span>
               </div>

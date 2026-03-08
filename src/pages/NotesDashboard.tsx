@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   FileText,
-  Link as LinkIcon,
   FileUp,
   Loader2,
   Search,
@@ -131,9 +130,6 @@ export default function NotesDashboard() {
   const { isPro } = useUserProfile();
   const { open: openUpgrade } = useUpgradeDialog();
   const [search, setSearch] = useState("");
-  const [youtubeOpen, setYoutubeOpen] = useState(false);
-  const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [youtubeLoading, setYoutubeLoading] = useState(false);
   const [docModalOpen, setDocModalOpen] = useState(false);
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docLoading, setDocLoading] = useState(false);
@@ -179,7 +175,6 @@ export default function NotesDashboard() {
     setCreatingProgress(100);
     setTimeout(() => {
       setDocLoading(false);
-      setYoutubeLoading(false);
       setVoiceLoading(false);
       setCreatingProgress(0);
       navigate(`/notes/${noteId}`);
@@ -404,47 +399,6 @@ export default function NotesDashboard() {
     }
   };
 
-  const handleYoutubeSubmit = async () => {
-    if (!user?.uid || !youtubeUrl.trim()) return;
-    if (!canCreateNote) {
-      openUpgrade({ reason: "free_limit" });
-      return;
-    }
-    const urlToUse = youtubeUrl.trim();
-    setYoutubeOpen(false);
-    setYoutubeLoading(true);
-    startProgressSimulation();
-    try {
-      const res = await api.post<{ title: string; content: string }>("/api/notes/process-url", {
-        url: urlToUse,
-      });
-      const noteId = await createNote(user.uid, {
-        sourceType: "youtube",
-        title: res.title || "YouTube note",
-        content: markdownToNoteHtml(res.content || ""),
-        sourceUrl: urlToUse,
-      });
-      setYoutubeUrl("");
-      finishProgressAndNavigate(noteId);
-    } catch (err) {
-      console.error(err);
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-      setCreatingProgress(0);
-      setYoutubeLoading(false);
-      const message = err instanceof Error ? err.message : "Could not process link.";
-      toast({
-        title: "Error",
-        description: message.includes("Failed to fetch") || message.includes("NetworkError")
-          ? "Network error. Check your connection and that the server is running."
-          : message,
-        variant: "destructive",
-      });
-    }
-  };
-
   const openNote = (noteId: string) => navigate(`/notes/${noteId}`);
   const openShared = (share: SharedNoteRecord) => {
     navigate(`/shared/${share.id}`);
@@ -479,9 +433,9 @@ export default function NotesDashboard() {
 
   return (
     <>
-      {(docLoading || youtubeLoading || voiceLoading) && (
+      {(docLoading || voiceLoading) && (
         <CreatingNotesLoading
-          message={docLoading ? "Processing document..." : youtubeLoading ? "Processing link..." : "Transcribing and generating notes..."}
+          message={docLoading ? "Processing document..." : "Transcribing and generating notes..."}
           progress={creatingProgress}
         />
       )}
@@ -493,7 +447,7 @@ export default function NotesDashboard() {
           </p>
         </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-7">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-7">
         <DashboardActionCard
           icon={FileUp}
           title="Document upload"
@@ -505,19 +459,6 @@ export default function NotesDashboard() {
               return;
             }
             setDocModalOpen(true);
-          }}
-        />
-        <DashboardActionCard
-          icon={LinkIcon}
-          title="YouTube & links"
-          subtitle="URL → AI notes"
-          gradient="from-rose-500 to-pink-500"
-          onClick={() => {
-            if (!canCreateNote) {
-              openUpgrade({ reason: "free_limit" });
-              return;
-            }
-            setYoutubeOpen(true);
           }}
         />
         <DashboardActionCard
@@ -629,29 +570,6 @@ export default function NotesDashboard() {
           )}
         </TabsContent>
       </Tabs>
-
-      <Dialog open={youtubeOpen} onOpenChange={setYoutubeOpen}>
-        <DialogContent className="bg-background text-foreground border-border">
-          <DialogHeader>
-            <DialogTitle className="text-foreground">Create note from source</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <Input
-              placeholder="Paste a website or YouTube link..."
-              value={youtubeUrl}
-              onChange={(e) => setYoutubeUrl(e.target.value)}
-            />
-            <Button
-              className="w-full"
-              onClick={handleYoutubeSubmit}
-              disabled={youtubeLoading || !youtubeUrl.trim()}
-            >
-              {youtubeLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Generate Notes
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={voiceModalOpen} onOpenChange={(open) => { setVoiceModalOpen(open); if (!open) { handleStopRecording(); setRecordedBlob(null); } }}>
         <DialogContent className="bg-background text-foreground border-border">
