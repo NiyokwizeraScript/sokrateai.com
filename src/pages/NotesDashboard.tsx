@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Mic,
   Square,
+  Link as LinkIcon,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -143,6 +144,9 @@ export default function NotesDashboard() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const [linkModalOpen, setLinkModalOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkLoading, setLinkLoading] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -176,6 +180,7 @@ export default function NotesDashboard() {
     setTimeout(() => {
       setDocLoading(false);
       setVoiceLoading(false);
+      setLinkLoading(false);
       setCreatingProgress(0);
       navigate(`/notes/${noteId}`);
     }, 600);
@@ -294,6 +299,44 @@ export default function NotesDashboard() {
       navigate(`/notes/${noteId}`);
     } catch {
       toast({ title: "Error", description: "Could not create note.", variant: "destructive" });
+    }
+  };
+
+  const handleLinkSubmit = async () => {
+    if (!user?.uid || !linkUrl.trim()) return;
+    if (!canCreateNote) {
+      openUpgrade({ reason: "free_limit" });
+      return;
+    }
+    setLinkModalOpen(false);
+    setLinkLoading(true);
+    startProgressSimulation();
+    try {
+      const res = await api.post<{ title: string; content: string }>("/api/notes/from-link", {
+        url: linkUrl.trim(),
+      });
+      const content = markdownToNoteHtml(res.content || "");
+      const noteId = await createNote(user.uid, {
+        sourceType: "link",
+        title: res.title || "Web page note",
+        content,
+        sourceUrl: linkUrl.trim(),
+      });
+      setLinkUrl("");
+      finishProgressAndNavigate(noteId);
+    } catch (err) {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      setCreatingProgress(0);
+      setLinkLoading(false);
+      const message = err instanceof Error ? err.message : "Could not generate notes from this link.";
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -433,9 +476,9 @@ export default function NotesDashboard() {
 
   return (
     <>
-      {(docLoading || voiceLoading) && (
+      {(docLoading || voiceLoading || linkLoading) && (
         <CreatingNotesLoading
-          message={docLoading ? "Processing document..." : "Transcribing and generating notes..."}
+          message={docLoading ? "Processing document..." : linkLoading ? "Fetching and generating notes..." : "Transcribing and generating notes..."}
           progress={creatingProgress}
         />
       )}
@@ -447,7 +490,7 @@ export default function NotesDashboard() {
           </p>
         </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-7">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-7">
         <DashboardActionCard
           icon={FileUp}
           title="Document upload"
@@ -459,6 +502,20 @@ export default function NotesDashboard() {
               return;
             }
             setDocModalOpen(true);
+          }}
+        />
+        <DashboardActionCard
+          icon={LinkIcon}
+          title="Web link"
+          subtitle="Paste any URL"
+          gradient="from-orange-500 to-amber-500"
+          onClick={() => {
+            if (!canCreateNote) {
+              openUpgrade({ reason: "free_limit" });
+              return;
+            }
+            setLinkUrl("");
+            setLinkModalOpen(true);
           }}
         />
         <DashboardActionCard
@@ -647,6 +704,33 @@ export default function NotesDashboard() {
               disabled={docLoading || !docFile}
             >
               {docLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Generate Notes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={linkModalOpen} onOpenChange={setLinkModalOpen}>
+        <DialogContent className="bg-background text-foreground border-border">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Create note from web link</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground">
+              Paste a URL and we'll extract the content and generate structured notes.
+            </p>
+            <Input
+              placeholder="https://example.com/article"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && linkUrl.trim() && handleLinkSubmit()}
+            />
+            <Button
+              className="w-full"
+              onClick={handleLinkSubmit}
+              disabled={linkLoading || !linkUrl.trim()}
+            >
+              {linkLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Generate Notes
             </Button>
           </div>

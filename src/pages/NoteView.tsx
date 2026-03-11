@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Share2, Trophy, Send, Loader2, Trash2, ArrowLeft, Paperclip, X, HelpCircle, Layers } from "lucide-react";
+import { Share2, Trophy, Send, Loader2, Trash2, ArrowLeft, Paperclip, X, HelpCircle, Layers, FileText, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getNote, updateNote, shareNoteToEmail, deleteNote } from "@/lib/firestore";
 import {
@@ -29,6 +29,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { validateFile, formatFileSize } from "@/lib/file-extractors";
+import { cn } from "@/lib/utils";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -53,6 +54,7 @@ export default function NoteView() {
   const [deleting, setDeleting] = useState(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const chatFileInputRef = useRef<HTMLInputElement>(null);
+  const [mobilePanel, setMobilePanel] = useState<"notes" | "chat">("notes");
 
   const { data: note, isLoading } = useQuery({
     queryKey: ["note", user?.uid, noteId],
@@ -212,68 +214,102 @@ export default function NoteView() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-5rem)]">
-      <header className="flex items-center gap-2 border-b bg-background px-4 py-2 shrink-0">
+      <header className="flex items-center gap-1 sm:gap-2 border-b bg-background px-2 sm:px-4 py-2 shrink-0 overflow-x-auto">
         <Button
           variant="ghost"
           size="icon"
-          className="shrink-0"
+          className="shrink-0 h-8 w-8 sm:h-9 sm:w-9"
           onClick={() => navigate("/dashboard")}
           aria-label="Back to dashboard"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={handleSaveTitle}
-          className="font-semibold border-0 shadow-none focus-visible:ring-0 max-w-xs"
+          className="font-semibold border-0 shadow-none focus-visible:ring-0 min-w-[100px] max-w-[120px] sm:max-w-xs text-sm sm:text-base"
         />
-        <div className="flex-1" />
-        <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
-          <Share2 className="h-4 w-4 mr-1" />
-          Share
-        </Button>
-        {messages.length > 0 && (
-          <>
-            <Button size="sm" onClick={() => navigate(`/notes/${noteId}/quiz`)} className="bg-amber-500 hover:bg-amber-600 text-white border-0">
-              <Trophy className="h-4 w-4 mr-1" />
-              Quiz
-            </Button>
-            <Button size="sm" onClick={() => navigate(`/notes/${noteId}/flashcards`)} className="bg-violet-500 hover:bg-violet-600 text-white border-0">
-              <Layers className="h-4 w-4 mr-1" />
-              Flashcards
-            </Button>
-          </>
-        )}
-        <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label="Delete note">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete this note?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This cannot be undone. The note will be permanently removed.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={(e) => { e.preventDefault(); handleDeleteNote(); }}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                disabled={deleting}
-              >
-                {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <div className="flex-1 min-w-0" />
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <Button variant="outline" size="sm" onClick={() => setShareOpen(true)} className="h-8 px-2 sm:px-3">
+            <Share2 className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Share</span>
+          </Button>
+          {messages.length > 0 && (
+            <>
+              <Button size="sm" onClick={() => navigate(`/notes/${noteId}/quiz`)} className="bg-amber-500 hover:bg-amber-600 text-white border-0 h-8 px-2 sm:px-3">
+                <Trophy className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Quiz</span>
+              </Button>
+              <Button size="sm" onClick={() => navigate(`/notes/${noteId}/flashcards`)} className="bg-violet-500 hover:bg-violet-600 text-white border-0 h-8 px-2 sm:px-3">
+                <Layers className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Flashcards</span>
+              </Button>
+            </>
+          )}
+          <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" aria-label="Delete note">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this note?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This cannot be undone. The note will be permanently removed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={(e) => { e.preventDefault(); handleDeleteNote(); }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  disabled={deleting}
+                >
+                  {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </header>
 
-      <Resizable direction="horizontal" className="flex-1 min-h-0 flex">
+      {/* Mobile panel toggle - only visible on small screens */}
+      <div className="md:hidden flex border-b bg-muted/30 shrink-0">
+        <button
+          type="button"
+          onClick={() => setMobilePanel("notes")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors",
+            mobilePanel === "notes"
+              ? "text-foreground border-b-2 border-primary bg-background"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <FileText className="h-4 w-4" />
+          Notes
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobilePanel("chat")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors",
+            mobilePanel === "chat"
+              ? "text-foreground border-b-2 border-primary bg-background"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <MessageSquare className="h-4 w-4" />
+          AI Chat
+        </button>
+      </div>
+
+      {/* Desktop: Resizable panels - only render on md+ */}
+      <div className="hidden md:flex flex-1 min-h-0">
+        <Resizable direction="horizontal" className="flex-1 min-h-0 flex">
         <ResizablePanel defaultSize={50} minSize={30} className="min-h-0 flex flex-col">
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden p-4">
             <p className="text-xs text-muted-foreground/80 mb-2 shrink-0">All changes and edits are auto-saved. No need to save manually.</p>
@@ -425,10 +461,164 @@ export default function NoteView() {
             )}
           </div>
         </ResizablePanel>
-      </Resizable>
+        </Resizable>
+      </div>
+
+      {/* Mobile: Single panel view */}
+      <div className="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
+        {mobilePanel === "notes" ? (
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden p-4">
+            <p className="text-xs text-muted-foreground/80 mb-2 shrink-0">All changes and edits are auto-saved. No need to save manually.</p>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <RichNoteEditor
+                value={content}
+                onChange={setContent}
+                onBlur={handleSaveContent}
+                placeholder="Type your notes..."
+                className="min-h-full"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-muted/20">
+            <input
+              type="file"
+              className="hidden"
+              accept=".pdf,.doc,.docx,.txt,.md,.ppt,.pptx,.jpg,.jpeg,.png,.webp,image/*,application/pdf,text/plain,text/markdown"
+              onChange={handleChatFileSelect}
+              aria-label="Attach document"
+              id="mobile-chat-file-input"
+            />
+            {messages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 text-center overflow-y-auto">
+                <div className="w-full max-w-md grid grid-cols-2 gap-3 mb-6">
+                  <button
+                    type="button"
+                    onClick={() => noteId && navigate(`/notes/${noteId}/quiz`)}
+                    className="relative rounded-xl border-2 border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/50 dark:hover:to-orange-900/40 p-3 sm:p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 shadow-sm hover:shadow"
+                  >
+                    <span className="absolute top-2 right-2 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      Popular
+                    </span>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/25 flex items-center justify-center shrink-0">
+                        <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground text-sm sm:text-base">Quizzes</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">Test your knowledge</p>
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => noteId && navigate(`/notes/${noteId}/flashcards`)}
+                    className="rounded-xl border-2 border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/40 dark:to-indigo-950/30 hover:from-violet-100 hover:to-indigo-100 dark:hover:from-violet-900/50 dark:hover:to-indigo-900/40 p-3 sm:p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 shadow-sm hover:shadow"
+                  >
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-violet-500/25 flex items-center justify-center shrink-0">
+                        <Layers className="h-4 w-4 sm:h-5 sm:w-5 text-violet-600 dark:text-violet-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground text-sm sm:text-base">Flashcards</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">Study with active recall</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground">
+                  Hey, I&apos;m Sokrate AI
+                </h2>
+                <p className="text-sm text-muted-foreground mt-2 max-w-sm px-2">
+                  I can work with you on your notes and answer any questions!
+                </p>
+                <div className="w-full max-w-md mt-4 space-y-2 px-2">
+                  {attachedFile && (
+                    <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2 text-left text-sm">
+                      <span className="truncate flex-1 text-foreground">{attachedFile.name}</span>
+                      <span className="text-muted-foreground shrink-0">{formatFileSize(attachedFile.size)}</span>
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => setAttachedFile(null)} aria-label="Remove attachment">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1 rounded-xl border border-input bg-background px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
+                    <Input
+                      placeholder="Ask a question..."
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
+                      className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground text-sm"
+                    />
+                    <Button type="button" variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Attach document" onClick={() => document.getElementById("mobile-chat-file-input")?.click()}>
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" size="icon" className="shrink-0 h-8 w-8" onClick={handleSendMessage} disabled={chatLoading || (!chatInput.trim() && !attachedFile)}>
+                      {chatLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
+                  {messages.map((m, i) => (
+                    <div
+                      key={i}
+                      className={m.role === "user" ? "text-right" : "text-left"}
+                    >
+                      {m.role === "user" ? (
+                        <span className="inline-block rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm max-w-[85%]">
+                          {m.content}
+                        </span>
+                      ) : (
+                        <div className="inline-block w-full max-w-full rounded-xl border border-emerald-500/15 bg-[#0B0F14]/50 dark:bg-muted/80 px-3 sm:px-4 py-3 text-left">
+                          <PremiumMarkdown content={m.content} className="text-sm" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {chatLoading && (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Thinking...
+                    </div>
+                  )}
+                </div>
+                <div className="p-3 sm:p-4 border-t space-y-2">
+                  {attachedFile && (
+                    <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm">
+                      <span className="truncate flex-1 text-foreground">{attachedFile.name}</span>
+                      <span className="text-muted-foreground shrink-0">{formatFileSize(attachedFile.size)}</span>
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => setAttachedFile(null)} aria-label="Remove attachment">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1 rounded-xl border border-input bg-background px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
+                    <Input
+                      placeholder="Ask a question..."
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
+                      className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground text-sm"
+                    />
+                    <Button type="button" variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Attach document" onClick={() => document.getElementById("mobile-chat-file-input")?.click()}>
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" size="icon" className="shrink-0 h-8 w-8" onClick={handleSendMessage} disabled={chatLoading || (!chatInput.trim() && !attachedFile)}>
+                      {chatLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Share note</DialogTitle>
           </DialogHeader>

@@ -379,6 +379,98 @@ Rules for the notes:
     }
 });
 
+// Notes: generate notes from a web link (non-YouTube)
+app.post('/api/notes/from-link', async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url || typeof url !== 'string') {
+            return res.status(400).json({ error: 'url required' });
+        }
+
+        // Block YouTube links - use process-url for those
+        if (/youtube\.com|youtu\.be/i.test(url)) {
+            return res.status(400).json({ error: 'YouTube links are not supported with this feature.' });
+        }
+
+        if (!genAI && !anthropic) {
+            return res.status(503).json({ error: 'Add GEMINI_API_KEY or ANTHROPIC_API_KEY to your .env' });
+        }
+
+        // Fetch webpage content
+        let pageContent = '';
+        try {
+            const fetchRes = await fetch(url, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SokrateAI/1.0)' },
+                signal: AbortSignal.timeout(15000),
+            });
+            if (!fetchRes.ok) {
+                return res.status(400).json({ error: `Could not fetch the webpage (status ${fetchRes.status}). Check the URL.` });
+            }
+            const html = await fetchRes.text();
+            pageContent = html
+                .replace(/<script[\s\S]*?<\/script>/gi, '')
+                .replace(/<style[\s\S]*?<\/style>/gi, '')
+                .replace(/<[^>]+>/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .slice(0, 80000);
+        } catch (fetchErr) {
+            console.error('[Server] from-link fetch error:', fetchErr);
+            return res.status(400).json({ error: 'Could not fetch the webpage. Check the URL or try again later.' });
+        }
+
+        if (!pageContent.trim()) {
+            return res.status(400).json({ error: 'No readable content found on this page.' });
+        }
+
+        // Extract a title from the URL for the note
+        let title = 'Web page note';
+        try {
+            const urlObj = new URL(url);
+            title = urlObj.hostname.replace(/^www\./, '');
+        } catch {}
+
+        const prompt = `You are a study assistant. Below is text extracted from a webpage (Source: ${url}).
+
+Turn this into clear, structured study notes in markdown. Follow these rules:
+
+1. CONTENT: Use only the actual content from the page. Focus on the main article or information.
+2. VISUAL STYLE — write so it looks clean and easy to read:
+   - Headings: use # for the main title, ## for main sections, ### for subsections. Blank line after every heading.
+   - Paragraphs: short paragraphs (2–4 sentences). Blank line between paragraphs.
+   - Lists: simple bullets (one "- " per line).
+   - Bold: use **only** for key terms, not whole lines.
+3. Include: a short summary at the top, main points and key ideas as sections, important facts or quotes.
+4. Output only the notes in markdown. No intro line like "Here are your notes".
+
+Page content:
+${pageContent}`;
+
+        let content = '';
+        if (genAI) {
+            const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+            const result = await model.generateContent(prompt);
+            content = result.response?.text?.() ?? '';
+        } else {
+            const msg = await anthropic.messages.create({
+                model: MODEL_ID,
+                max_tokens: 4096,
+                messages: [{ role: 'user', content: prompt }],
+            });
+            content = msg.content[0].text;
+        }
+
+        if (!content.trim()) {
+            return res.status(500).json({ error: 'No notes could be generated from this page.' });
+        }
+
+        res.json({ title, content: content.trim() });
+    } catch (error) {
+        console.error('[Server] from-link Error:', error);
+        res.status(500).json({ error: error?.message || 'Note generation failed' });
+    }
+});
+
 // Notes: chat with note context (Gemini or Anthropic). Supports optional attachments: text, image, PDF/DOC.
 app.post('/api/notes/chat', async (req, res) => {
     if (!genAI && !anthropic) {

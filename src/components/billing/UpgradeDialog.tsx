@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { SokrateLogo } from "@/components/auth/SokrateLogo";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileUp, Users, Zap, BookOpen, MessageSquare } from "lucide-react";
+import { FileUp, Users, Zap, BookOpen, MessageSquare, Link as LinkIcon } from "lucide-react";
 
 export type UpgradeReason = "free_limit" | undefined;
 
@@ -22,7 +22,7 @@ export function useUpgradeDialog() {
 }
 
 const FREE_LIMIT_DESCRIPTION =
-  "Free users can use only one feature once — document upload, AI notes, or voice recording. After creating a note with one, the others are locked. Pro users have unlimited access to all features.";
+  "Free users can use only one feature once — document upload, web link, AI notes, or voice recording. After creating a note with one, the others are locked. Pro users have unlimited access to all features.";
 
 export function UpgradeDialogProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -55,7 +55,7 @@ export function UpgradeDialogProvider({ children }: { children: ReactNode }) {
             <ul className="space-y-3 text-sm text-foreground/90 dark:text-white/85">
               {[
                 { icon: FileUp, text: "Unlimited document uploads and voice recordings." },
-                { icon: Users, text: "Collaborate with Sokrate on more complex tasks." },
+                { icon: LinkIcon, text: "Unlimited web link imports." },
                 { icon: Zap, text: "Unlimited faster AI edits." },
                 { icon: BookOpen, text: "Unlimited and better quizzes and flashcards." },
                 { icon: MessageSquare, text: "Unlimited chat conversations and notes." },
