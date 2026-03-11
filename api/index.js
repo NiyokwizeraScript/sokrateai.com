@@ -80,9 +80,11 @@ const anthropic = anthropicApiKey ? new Anthropic({ apiKey: anthropicApiKey }) :
 // Initialize Gemini Client (optional) – use GEMINI_API_KEY (e.g. from Google AI Studio, often starts with AIza...)
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
-// Use a current model (2.0-flash no longer available to new users). Override in .env with GEMINI_MODEL_NAME if needed.
-const GEMINI_MODEL = process.env.GEMINI_MODEL_NAME?.trim() || 'gemini-2.5-flash';
-const GEMINI_VISION_MODEL = process.env.GEMINI_VISION_MODEL_NAME?.trim() || GEMINI_MODEL;
+// Gemini models - Pro for high-quality note generation, Flash for quick tasks
+// gemini-2.5-pro provides better depth, structure, and academic quality for study notes
+const GEMINI_MODEL = process.env.GEMINI_MODEL_NAME?.trim() || 'gemini-2.5-pro';
+const GEMINI_VISION_MODEL = process.env.GEMINI_VISION_MODEL_NAME?.trim() || 'gemini-2.5-pro';
+const GEMINI_FAST_MODEL = process.env.GEMINI_FAST_MODEL_NAME?.trim() || 'gemini-2.5-flash';
 
 // Initialize Stripe Client (only when key is set - avoids crash in dev without Stripe)
 const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
@@ -174,6 +176,9 @@ app.post('/api/quiz/generate', async (req, res) => {
         console.log(`[Server] Generating Quiz... Image provided: ${!!image}`);
 
         const prompt = `Generate ${count} multiple-choice questions (difficulty: ${difficulty}) based strictly on the provided text or image.
+
+IMPORTANT: Detect the language of the provided content and generate ALL questions and options in the SAME LANGUAGE. Do NOT translate to English.
+
 Return a JSON array only, no markdown. Each item: { "id": number, "question": "...", "options": ["A","B","C","D"], "correct": 0 } (correct is index 0-3).
 
 Text Content:
@@ -260,24 +265,65 @@ app.post('/api/synthesize', async (req, res) => {
         const sendDocumentInline = !!(documentBase64 && documentMimeType);
         console.log(`[Server] Synthesizing... Image provided: ${!!image}, Document inline: ${sendDocumentInline}`);
 
-        const prompt = `You are creating study notes from the user's content. Follow these rules strictly:
+        const prompt = `You are creating premium, exam-ready study notes from the user's content. Follow these rules strictly:
 
-1. CONTENT: Use only the actual content from the attached document, image, or text. Never infer from the filename or title. No "Based on the document title" or similar.
+## LANGUAGE RULES (CRITICAL)
+- DETECT the language of the source content (document, image, or text)
+- GENERATE all notes in the SAME LANGUAGE as the source content
+- Do NOT translate to English unless the source is already in English
+- Preserve all technical terms, proper nouns, and domain-specific vocabulary in the original language
+- If the source contains multiple languages, use the predominant language for the notes
 
-2. VISUAL STYLE — write so it looks clean and easy to read, like a well-formatted document:
-   - No unnecessary symbols: no "---", no "###" or "##" as decoration, no asterisks or dashes used as separators inside paragraphs. The reader should see clear text, not markdown clutter.
-   - Headings: use only # for the main title, ## for main sections, ### for subsections. Put a blank line after every heading.
-   - Paragraphs: use short paragraphs (2–4 sentences). Leave a blank line between paragraphs.
-   - Lists: use simple bullets (one "- " per line). One bullet per line; never put several points in one line separated by * or •.
-   - Spacing: add a blank line between sections so the page breathes. No walls of text.
-   - Bold: use **only** for the occasional key term, not for whole lines.
-   Write so the result looks like a clean, structured document with clear line breaks and paragraphs—no symbol soup.
+## CONTENT RULES
+- Use ONLY the actual content from the attached document, image, or text
+- Never infer from filename or title. No "Based on the document title" or similar
+- Extract key concepts, definitions, formulas, and examples from the source material
 
-3. Output only the notes. No intro line like "Here are your notes".
+## IMAGE HANDLING (if document contains images, diagrams, charts, or figures)
+- DESCRIBE each relevant image/diagram/figure when it appears in the content
+- Use this format for images: **[📊 Figure: Description]** or **[📷 Image: Description]**
+- Include what the image shows and why it's important for understanding
+- Place image descriptions in the appropriate section near related explanations
+- For diagrams/charts: describe the key data, relationships, or processes shown
+- For photos/illustrations: describe what is depicted and its relevance to the topic
+- Example: **[📊 Figure: Diagram showing the electron transport chain with proteins I-IV and ATP synthase]**
+
+## STRUCTURE (use these sections as appropriate to the content):
+1. Start with a clear **# Main Title** (with relevant emoji, e.g. "# 📐 Stoichiometry Essentials")
+2. **## Brief Overview** — 2-3 sentences summarizing what this covers and why it matters
+3. **## Key Points** — bullet list of the most important takeaways
+4. **## Definitions** — use blockquotes for key terms:
+   > **Term**: Definition here
+5. **## Detailed Explanation** — thorough breakdown of concepts with subsections (### ) as needed
+   - Include **[📊 Figure: ...]** descriptions where images appear in the source
+6. **## Worked Example** (if applicable) — step-by-step walkthrough with:
+   - Problem statement
+   - Numbered steps using "1. ", "2. ", etc.
+   - Clear solution/answer
+7. **## Summary** — brief recap of main points
+8. **## Exam Tips** (if applicable) — quick tips for remembering or applying this material
+
+## FORMATTING RULES
+- Headings: # for title, ## for sections, ### for subsections. Always blank line after headings.
+- Use **bold** for key terms (sparingly, only important words)
+- Use blockquotes (>) for definitions and important callouts
+- Use bullet points (- ) for lists, one item per line
+- Use numbered lists (1. 2. 3.) for sequential steps
+- For math/equations: write clearly on own line, e.g. "2C₄H₁₀ + 13O₂ → 8CO₂ + 10H₂O"
+- Add blank lines between sections for readability
+- Keep paragraphs short (2-4 sentences)
+- Academic tone: clear, professional, not childish
+
+## OUTPUT
+- Output only the markdown notes IN THE SAME LANGUAGE AS THE SOURCE
+- No intro like "Here are your notes"
+- Make notes detailed enough for exam revision but scannable
+- If content has formulas/equations, format them clearly
+- Include image/figure descriptions where relevant
 
 Text content (if any):
 ${fileContent ? fileContent.substring(0, 20000) : "No text provided."}
-${sendDocumentInline ? "\nAn attached document is also provided; your notes must be based solely on its actual content, not its filename or title." : ""}
+${sendDocumentInline ? "\nAn attached document is also provided. Your notes must be based solely on its actual content (including any images, diagrams, or figures). Describe relevant visuals where they appear." : ""}
 `;
 
         if (genAI) {
@@ -346,16 +392,45 @@ app.post('/api/notes/from-recording', async (req, res) => {
             return res.status(503).json({ error: 'Voice recording requires GEMINI_API_KEY. Add it to your .env.' });
         }
 
-        const prompt = `Transcribe this audio and generate structured, exam-ready study notes following our existing Sokrate formatting rules.
+        const prompt = `Transcribe this audio and generate premium, exam-ready study notes. Follow these rules:
 
-Rules for the notes:
-1. CONTENT: Use only what is actually spoken in the audio. Do not invent or infer content.
-2. VISUAL STYLE — write so it looks clean and easy to read:
-   - Headings: use # for the main title, ## for main sections, ### for subsections. Put a blank line after every heading.
-   - Paragraphs: short paragraphs (2–4 sentences). Blank line between paragraphs.
-   - Lists: simple bullets (one "- " per line). Blank line between sections.
-   - Bold: use **only** for key terms, not whole lines.
-3. Output only the notes in markdown. No intro line like "Here are your notes" or "Based on the recording."`;
+## LANGUAGE RULES (CRITICAL)
+- DETECT the language being spoken in the audio
+- TRANSCRIBE and GENERATE all notes in the SAME LANGUAGE as the audio
+- Do NOT translate to English unless the speaker is already speaking English
+- Preserve all technical terms, proper nouns, and domain-specific vocabulary in the original language
+- If the speaker uses multiple languages, use the predominant language for the notes
+
+## CONTENT RULES
+- Use ONLY what is actually spoken in the audio. Do not invent or infer content.
+- Extract key concepts, definitions, formulas, and examples mentioned.
+
+## STRUCTURE (use sections as appropriate):
+1. **# Main Title** — descriptive title with relevant emoji (e.g. "# 🎓 Lecture Notes: [Topic]")
+2. **## Brief Overview** — 2-3 sentences summarizing the recording content
+3. **## Key Points** — bullet list of main takeaways
+4. **## Definitions** — use blockquotes for key terms:
+   > **Term**: Definition here
+5. **## Detailed Notes** — organized breakdown with subsections (###) as needed
+6. **## Worked Example** (if any examples were discussed) — step-by-step format
+7. **## Summary** — brief recap
+8. **## Exam Tips** (if applicable)
+
+## FORMATTING RULES
+- Headings: # for title, ## for sections, ### for subsections. Blank line after headings.
+- **Bold** for key terms only (sparingly)
+- Blockquotes (>) for definitions and callouts
+- Bullet points (- ) for lists
+- Numbered lists (1. 2. 3.) for sequential steps
+- Math/equations: write clearly, e.g. "E = mc²"
+- Blank lines between sections
+- Short paragraphs (2-4 sentences)
+- Academic tone: clear, professional
+
+## OUTPUT
+- Output only markdown notes IN THE SAME LANGUAGE AS THE AUDIO
+- No intro like "Here are your notes"
+- Make notes detailed for revision but scannable`;
 
         const model = genAI.getGenerativeModel({ model: GEMINI_AUDIO_MODEL });
         const audioMime = mimeType && mimeType.startsWith('audio/') ? mimeType : 'audio/webm';
@@ -430,18 +505,46 @@ app.post('/api/notes/from-link', async (req, res) => {
             title = urlObj.hostname.replace(/^www\./, '');
         } catch {}
 
-        const prompt = `You are a study assistant. Below is text extracted from a webpage (Source: ${url}).
+        const prompt = `You are creating premium, exam-ready study notes from a webpage (Source: ${url}).
 
-Turn this into clear, structured study notes in markdown. Follow these rules:
+## LANGUAGE RULES (CRITICAL)
+- DETECT the language of the webpage content
+- GENERATE all notes in the SAME LANGUAGE as the webpage
+- Do NOT translate to English unless the webpage is already in English
+- Preserve all technical terms, proper nouns, and domain-specific vocabulary in the original language
+- If the page contains multiple languages, use the predominant language for the notes
 
-1. CONTENT: Use only the actual content from the page. Focus on the main article or information.
-2. VISUAL STYLE — write so it looks clean and easy to read:
-   - Headings: use # for the main title, ## for main sections, ### for subsections. Blank line after every heading.
-   - Paragraphs: short paragraphs (2–4 sentences). Blank line between paragraphs.
-   - Lists: simple bullets (one "- " per line).
-   - Bold: use **only** for key terms, not whole lines.
-3. Include: a short summary at the top, main points and key ideas as sections, important facts or quotes.
-4. Output only the notes in markdown. No intro line like "Here are your notes".
+## CONTENT RULES
+- Use ONLY the actual content from the page. Focus on the main article/information.
+- Extract key concepts, definitions, facts, and examples.
+
+## STRUCTURE (use sections as appropriate):
+1. **# Main Title** — descriptive title with relevant emoji (e.g. "# 🔬 [Topic Name]")
+2. **## Brief Overview** — 2-3 sentences on what this covers and why it matters
+3. **## Key Points** — bullet list of main takeaways
+4. **## Definitions** — use blockquotes for key terms:
+   > **Term**: Definition here
+5. **## Detailed Explanation** — thorough breakdown with subsections (###) as needed
+6. **## Examples** (if applicable) — concrete examples from the content
+7. **## Summary** — brief recap of main points
+8. **## Exam Tips** (if applicable) — tips for remembering/applying this
+
+## FORMATTING RULES
+- Headings: # for title, ## for sections, ### for subsections. Blank line after headings.
+- **Bold** for key terms only (sparingly)
+- Blockquotes (>) for definitions and important callouts
+- Bullet points (- ) for lists
+- Numbered lists (1. 2. 3.) for sequential steps
+- Math/equations: write clearly on own line
+- Blank lines between sections
+- Short paragraphs (2-4 sentences)
+- Academic tone: clear, professional, not childish
+
+## OUTPUT
+- Output only markdown notes IN THE SAME LANGUAGE AS THE WEBPAGE
+- No intro like "Here are your notes"
+- Make notes detailed for exam revision but scannable
+- Include source link at the end: "Source: [${url}](${url})"
 
 Page content:
 ${pageContent}`;
@@ -561,7 +664,11 @@ app.post('/api/notes/quiz', async (req, res) => {
     try {
         const { noteContent } = req.body;
         const content = (noteContent || '').slice(0, 20000);
-        const prompt = `Generate 5 multiple-choice questions based strictly on the following notes. Return a JSON array only, no markdown. Each item: { "id": 1, "question": "...", "options": ["A", "B", "C", "D"], "correct": 0 } (correct is index 0-3).
+        const prompt = `Generate 5 multiple-choice questions based strictly on the following notes.
+
+IMPORTANT: Detect the language of the notes and generate ALL questions and options in the SAME LANGUAGE. Do NOT translate to English.
+
+Return a JSON array only, no markdown. Each item: { "id": 1, "question": "...", "options": ["A", "B", "C", "D"], "correct": 0 } (correct is index 0-3).
 
 Notes:
 ${content}`;
@@ -596,7 +703,11 @@ app.post('/api/notes/flashcards', async (req, res) => {
     try {
         const { noteContent } = req.body;
         const content = (noteContent || '').slice(0, 20000);
-        const prompt = `Generate 8–12 flashcards from the following notes. Return a JSON array only, no markdown. Each item: { "front": "term or question", "back": "definition or answer" }. Keep front and back concise (one short sentence each).
+        const prompt = `Generate 8–12 flashcards from the following notes.
+
+IMPORTANT: Detect the language of the notes and generate ALL flashcards in the SAME LANGUAGE. Do NOT translate to English.
+
+Return a JSON array only, no markdown. Each item: { "front": "term or question", "back": "definition or answer" }. Keep front and back concise (one short sentence each).
 
 Notes:
 ${content}`;
